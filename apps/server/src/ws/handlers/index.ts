@@ -70,8 +70,9 @@ function handleJoin(
   }
 
   const publicState = room.getPublicState();
+  const isExistingPlayer = room.hasPlayer(event.playerId);
 
-  if (publicState.status !== "lobby") {
+  if (publicState.status !== "lobby" && isExistingPlayer === false) {
     send(context.socket, {
       type: "error",
       message: "Game already started",
@@ -101,11 +102,15 @@ function handleJoin(
 }
 
 function handleLeave(context: ConnectionContext): void {
-  if (context.currentRoom === null || context.currentPlayerId === null) {
+  const room = context.currentRoom;
+  const playerId = context.currentPlayerId;
+
+  if (room === null || playerId === null) {
     return;
   }
 
-  context.currentRoom.removePlayer(context.currentPlayerId);
+  room.disconnectPlayer(playerId);
+  room.removePlayer(playerId);
 
   if (context.unsubscribe !== null) {
     context.unsubscribe();

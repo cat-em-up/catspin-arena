@@ -6,17 +6,13 @@ import {
   getRoomIdFromHash,
   setRoomIdHash,
 } from "./utils/roomHash";
+import type { PlayerView } from "./types/playerView";
+import { NameScreen } from "./components/screens/NameScreen";
+import { RoomSetupScreen } from "./components/screens/RoomSetupScreen";
+import { LobbyScreen } from "./components/screens/LobbyScreen";
+import { GameScreen } from "./components/screens/GameScreen";
 
-type PlayerView = {
-  readonly id: string;
-  readonly name: string;
-  readonly balance: number;
-  readonly currentBet: number;
-  readonly isReady: boolean;
-  readonly isConnected: boolean;
-  readonly isEliminated: boolean;
-  readonly lastWin: number;
-};
+type Screen = "name" | "room_setup" | "lobby" | "game";
 
 function getPlayers(room: RoomDTO | null): readonly PlayerView[] {
   return room?.game.players ?? [];
@@ -33,6 +29,22 @@ function getCurrentPlayer(
   return room.game.players.find((player) => player.id === playerId) ?? null;
 }
 
+function getScreen(playerName: string | null, room: RoomDTO | null): Screen {
+  if (playerName === null || playerName.trim().length === 0) {
+    return "name";
+  }
+
+  if (room === null) {
+    return "room_setup";
+  }
+
+  if (room.game.status === "lobby") {
+    return "lobby";
+  }
+
+  return "game";
+}
+
 export default function App() {
   const store = useClientStore();
   const state = useClientStoreState();
@@ -40,7 +52,6 @@ export default function App() {
   const [roomInput, setRoomInput] = useState<string>(
     () => getRoomIdFromHash() ?? "",
   );
-  const [nameInput, setNameInput] = useState<string>(state.playerName ?? "");
   const [betInput, setBetInput] = useState<number>(10);
 
   const autoJoinAttemptedRef = useRef(false);
@@ -51,13 +62,18 @@ export default function App() {
     return getCurrentPlayer(state.room, state.playerId);
   }, [state.room, state.playerId]);
 
+  const screen = useMemo(() => {
+    return getScreen(state.playerName, state.room);
+  }, [state.playerName, state.room]);
+
   const isHost =
     state.room !== null &&
     state.playerId !== null &&
     state.room.game.hostPlayerId === state.playerId;
 
-  const canCreate = nameInput.trim().length > 0;
-  const canJoin = nameInput.trim().length > 0 && roomInput.trim().length > 0;
+  const trimmedPlayerName = state.playerName?.trim() ?? "";
+  const canCreate = trimmedPlayerName.length > 0;
+  const canJoin = trimmedPlayerName.length > 0 && roomInput.trim().length > 0;
 
   useEffect(() => {
     const handleHashChange = (): void => {
@@ -75,9 +91,9 @@ export default function App() {
 
   useEffect(() => {
     const roomIdFromHash = getRoomIdFromHash();
-    const name = nameInput.trim();
+    const name = state.playerName?.trim() ?? "";
 
-    if (roomIdFromHash === null || roomIdFromHash.length === 0) {
+    if (!roomIdFromHash) {
       return;
     }
 
@@ -99,12 +115,11 @@ export default function App() {
 
     autoJoinAttemptedRef.current = true;
 
-    store.setPlayerName(name);
     store.joinRoom({
       roomId: roomIdFromHash,
       name,
     });
-  }, [nameInput, state.connectionStatus, state.room, store]);
+  }, [state.connectionStatus, state.playerName, state.room, store]);
 
   useEffect(() => {
     if (state.room !== null) {
@@ -113,16 +128,30 @@ export default function App() {
     }
   }, [state.room]);
 
+  const handleSetPlayerName = (name: string): void => {
+    const trimmedName = name.trim();
+
+    if (trimmedName.length === 0) {
+      return;
+    }
+
+    store.setPlayerName(trimmedName);
+    autoJoinAttemptedRef.current = false;
+  };
+
+  const handleChangeName = (): void => {
+    store.setPlayerName("");
+    autoJoinAttemptedRef.current = false;
+  };
+
   const handleCreateRoom = async (): Promise<void> => {
-    const name = nameInput.trim();
+    const name = state.playerName?.trim() ?? "";
 
     if (name.length === 0) {
       return;
     }
 
     try {
-      store.setPlayerName(name);
-
       const roomId = await store.createRoom();
       setRoomIdHash(roomId);
       setRoomInput(roomId);
@@ -140,7 +169,7 @@ export default function App() {
 
   const handleJoinRoom = (): void => {
     const roomId = roomInput.trim();
-    const name = nameInput.trim();
+    const name = state.playerName?.trim() ?? "";
 
     if (roomId.length === 0 || name.length === 0) {
       return;
@@ -149,7 +178,6 @@ export default function App() {
     setRoomIdHash(roomId);
     autoJoinAttemptedRef.current = true;
 
-    store.setPlayerName(name);
     store.joinRoom({
       roomId,
       name,
@@ -157,9 +185,10 @@ export default function App() {
   };
 
   const handleLeaveRoom = (): void => {
-    store.leaveRoom();
+    autoJoinAttemptedRef.current = true;
     clearRoomIdHash();
-    autoJoinAttemptedRef.current = false;
+    setRoomInput("");
+    store.leaveRoom();
   };
 
   return (
@@ -187,182 +216,55 @@ export default function App() {
         <p style={{ color: "crimson" }}>{state.error}</p>
       ) : null}
 
-      <section
-        style={{
-          marginBottom: 24,
-          padding: 16,
-          border: "1px solid #ccc",
-          borderRadius: 12,
-        }}
-      >
-        <h2>Room Setup</h2>
+      {screen === "name" ? (
+        <NameScreen
+          initialValue={state.playerName ?? ""}
+          onSubmit={handleSetPlayerName}
+        />
+      ) : null}
 
-        <div style={{ display: "grid", gap: 12, maxWidth: 420 }}>
-          <input
-            value={nameInput}
-            onChange={(event) => {
-              setNameInput(event.target.value);
-              autoJoinAttemptedRef.current = false;
-            }}
-            placeholder="Your name"
-          />
+      {screen === "room_setup" ? (
+        <RoomSetupScreen
+          playerName={trimmedPlayerName}
+          roomInput={roomInput}
+          onRoomInputChange={(value) => {
+            setRoomInput(value);
+            autoJoinAttemptedRef.current = false;
+          }}
+          onCreateRoom={handleCreateRoom}
+          onJoinRoom={handleJoinRoom}
+          onChangeName={handleChangeName}
+          canCreate={canCreate}
+          canJoin={canJoin}
+        />
+      ) : null}
 
-          <div style={{ display: "flex", gap: 8 }}>
-            <input
-              value={roomInput}
-              onChange={(event) => {
-                setRoomInput(event.target.value);
-                autoJoinAttemptedRef.current = false;
-              }}
-              placeholder="Room ID"
-            />
-            <button
-              type="button"
-              onClick={handleCreateRoom}
-              disabled={!canCreate}
-            >
-              Create
-            </button>
-          </div>
+      {screen === "lobby" && state.room !== null ? (
+        <LobbyScreen
+          room={state.room}
+          playerId={state.playerId}
+          currentPlayer={currentPlayer}
+          players={players}
+          isHost={isHost}
+          onToggleReady={() =>
+            store.setReady(!(currentPlayer?.isReady ?? false))
+          }
+          onStartGame={() => store.startGame()}
+          onLeaveRoom={handleLeaveRoom}
+        />
+      ) : null}
 
-          <button type="button" onClick={handleJoinRoom} disabled={!canJoin}>
-            Join room
-          </button>
-        </div>
-      </section>
-
-      <section
-        style={{
-          marginBottom: 24,
-          padding: 16,
-          border: "1px solid #ccc",
-          borderRadius: 12,
-        }}
-      >
-        <h2>Lobby</h2>
-
-        <p>
-          Room: <strong>{state.room?.id ?? "—"}</strong>
-        </p>
-
-        <p>
-          Game status: <strong>{state.room?.game.status ?? "—"}</strong>
-        </p>
-
-        <p>
-          Round: <strong>{state.room?.game.round.index ?? "—"}</strong>
-        </p>
-
-        <p>
-          Round status: <strong>{state.room?.game.round.status ?? "—"}</strong>
-        </p>
-
-        <div
-          style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 12 }}
-        >
-          <button
-            type="button"
-            onClick={() => store.setReady(!(currentPlayer?.isReady ?? false))}
-            disabled={state.room === null || currentPlayer === null}
-          >
-            {currentPlayer?.isReady ? "Unset ready" : "Set ready"}
-          </button>
-
-          <button
-            type="button"
-            onClick={() => store.startGame()}
-            disabled={state.room === null || !isHost}
-          >
-            Start game
-          </button>
-
-          <button
-            type="button"
-            onClick={handleLeaveRoom}
-            disabled={state.room === null}
-          >
-            Leave room
-          </button>
-        </div>
-      </section>
-
-      <section
-        style={{
-          marginBottom: 24,
-          padding: 16,
-          border: "1px solid #ccc",
-          borderRadius: 12,
-        }}
-      >
-        <h2>Players</h2>
-
-        <ul style={{ paddingLeft: 20 }}>
-          {players.map((player) => {
-            const isCurrent = player.id === state.playerId;
-            const isRoomHost = state.room?.game.hostPlayerId === player.id;
-
-            return (
-              <li key={player.id} style={{ marginBottom: 8 }}>
-                <strong>{player.name}</strong>
-                {isCurrent ? " (you)" : ""}
-                {isRoomHost ? " 👑" : ""}
-                {" | "}
-                balance: {player.balance}
-                {" | "}
-                bet: {player.currentBet}
-                {" | "}
-                ready: {String(player.isReady)}
-                {" | "}
-                connected: {String(player.isConnected)}
-                {" | "}
-                eliminated: {String(player.isEliminated)}
-                {" | "}
-                last win: {player.lastWin}
-              </li>
-            );
-          })}
-        </ul>
-      </section>
-
-      <section
-        style={{
-          marginBottom: 24,
-          padding: 16,
-          border: "1px solid #ccc",
-          borderRadius: 12,
-        }}
-      >
-        <h2>Bet Control</h2>
-
-        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-          <input
-            type="number"
-            min={1}
-            value={Number.isFinite(betInput) ? betInput : 10}
-            onChange={(event) => setBetInput(Number(event.target.value) || 0)}
-          />
-          <button
-            type="button"
-            onClick={() => store.setBet(betInput)}
-            disabled={state.room === null}
-          >
-            Set bet
-          </button>
-        </div>
-      </section>
-
-      <section
-        style={{
-          padding: 16,
-          border: "1px solid #ccc",
-          borderRadius: 12,
-        }}
-      >
-        <h2>Raw Room State</h2>
-        <pre style={{ overflowX: "auto", whiteSpace: "pre-wrap" }}>
-          {JSON.stringify(state.room, null, 2)}
-        </pre>
-      </section>
+      {screen === "game" && state.room !== null ? (
+        <GameScreen
+          room={state.room}
+          playerId={state.playerId}
+          currentPlayer={currentPlayer}
+          betInput={betInput}
+          onBetInputChange={setBetInput}
+          onSetBet={() => store.setBet(betInput)}
+          onLeaveRoom={handleLeaveRoom}
+        />
+      ) : null}
     </div>
   );
 }

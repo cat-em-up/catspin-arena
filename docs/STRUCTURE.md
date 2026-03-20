@@ -23,10 +23,23 @@
 │  │     └─ index.ts
 │  └─ web
 │     ├─ src
+│     │  ├─ api
+│     │  │  └─ rooms.ts
+│     │  ├─ components
+│     │  │  ├─ favicon
+│     │  │  │  └─ animatedFavicon.ts
+│     │  │  └─ slot
+│     │  │     └─ slotSymbols.ts
 │     │  ├─ network
+│     │  │  ├─ client.ts
 │     │  │  └─ socket.ts
-│     │  └─ state
-│     │     └─ store.ts
+│     │  ├─ state
+│     │  │  └─ store.ts
+│     │  ├─ types
+│     │  │  └─ playerView.ts
+│     │  └─ utils
+│     │     ├─ playerName.ts
+│     │     └─ roomHash.ts
 │     └─ vite.config.ts
 └─ packages
    ├─ core
@@ -79,8 +92,8 @@ Classes:
 Exported Functions:
 - registerCreateRoomRoute(app, roomManager)
 
-Types:
-- CreateRoomResponse
+Internal Functions:
+- createRoomId()
 
 ### apps/server/src/index.ts
 
@@ -138,15 +151,82 @@ Types:
 Exported Functions:
 - attachWebSocketServer(app, roomManager)
 
+### apps/web/src/api/rooms.ts
+
+Exported Functions:
+- createRoom()
+
+Types:
+- CreateRoomResponse
+
+### apps/web/src/components/favicon/animatedFavicon.ts
+
+Exported Functions:
+- startAnimatedPawFavicon()
+
+Internal Functions:
+- createGoldenPawSvg(size, angle)
+- getOrCreateFaviconLink()
+
+### apps/web/src/components/slot/slotSymbols.ts
+
+Types:
+- SlotSymbolId
+
+### apps/web/src/network/client.ts
+
+Exported Functions:
+- createRealtimeClient(options)
+
+Internal Functions:
+- createId(prefix)
+- getOrCreatePlayerId()
+- getOrCreateSessionId()
+- savePlayerId(value)
+
+Types:
+- RealtimeClient
+- RealtimeClientOptions
+
 ### apps/web/src/network/socket.ts
 
 Exported Functions:
 - createSocket(url)
 
+Types:
+- SocketClient
+- SocketStatus
+
 ### apps/web/src/state/store.ts
+
+Exported Functions:
+- createClientStore(options)
 
 Types:
 - ClientStore
+- ClientStoreState
+- CreateClientStoreOptions
+
+### apps/web/src/types/playerView.ts
+
+Types:
+- PlayerView
+
+### apps/web/src/utils/playerName.ts
+
+Exported Functions:
+- getStoredPlayerName()
+- savePlayerName(value)
+
+### apps/web/src/utils/roomHash.ts
+
+Exported Functions:
+- clearRoomIdHash()
+- getRoomIdFromHash()
+- setRoomIdHash(roomId)
+
+Internal Functions:
+- buildUrlWithoutHash()
 
 ### apps/web/vite.config.ts
 
@@ -194,6 +274,7 @@ Internal Functions:
 - createBettingRound(state, now)
 - getAlivePlayers(players)
 - getWinnerPlayerId(state, players)
+- haveAllActivePlayersPlacedBets(state)
 - normalizeBetsForSpin(state)
 - preparePlayersForNextRound(state)
 - resolveBalances(state, result)

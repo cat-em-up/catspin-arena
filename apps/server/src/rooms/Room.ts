@@ -49,7 +49,19 @@ export class Room {
   }
 
   public getPublicState(): PublicGameState {
-    return getPublicState(this.state);
+    const publicState = getPublicState(this.state);
+
+    return {
+      ...publicState,
+      players: publicState.players.map((player) => {
+        const session = this.sessionsByPlayerId.get(player.id);
+
+        return {
+          ...player,
+          isConnected: session?.getSnapshot().connected ?? false,
+        };
+      }),
+    };
   }
 
   public getSnapshot(): RoomSnapshot {
@@ -67,7 +79,7 @@ export class Room {
   }
 
   public hasPlayer(playerId: string): boolean {
-    return this.sessionsByPlayerId.has(playerId);
+    return this.state.players.some((player) => player.id === playerId);
   }
 
   public joinPlayer(args: {

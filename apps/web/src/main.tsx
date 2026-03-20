@@ -1,10 +1,11 @@
 import ReactDOM from "react-dom/client";
 import App from "./App";
 import { StoreProvider } from "./state/storeContext";
+import { startAnimatedPawFavicon } from "./components/favicon/animatedFavicon";
 
-// import { startAnimatedPawFavicon } from "../src/app/animatedFavicon";
+import "./styles/app.css";
 
-// startAnimatedPawFavicon();
+startAnimatedPawFavicon();
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <StoreProvider>

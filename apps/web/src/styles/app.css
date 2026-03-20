@@ -1,0 +1,39 @@
+.player-item {
+  margin-bottom: 8px;
+  transition: opacity 0.2s ease;
+}
+
+/* ONLINE */
+.player-online {
+  opacity: 1;
+}
+
+/* OFFLINE */
+.player-offline {
+  opacity: 0.5;
+}
+
+/* STATUS BLOCK */
+.player-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* DOT */
+.player-status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: gray;
+}
+
+/* ONLINE DOT */
+.player-online .player-status-dot {
+  background-color: #4caf50;
+}
+
+/* OFFLINE DOT */
+.player-offline .player-status-dot {
+  background-color: #f44336;
+}

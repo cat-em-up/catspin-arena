@@ -205,11 +205,8 @@ export function applyCommand(
       const nextPlayers = state.players.map((player) => ({
         ...player,
         isReady: false,
-        currentBet: sanitizeBet(
-          state,
-          player.currentBet > 0 ? player.currentBet : state.config.minBet,
-          player.balance,
-        ),
+        currentBet: 0,
+        lastWin: 0,
       }));
 
       return {

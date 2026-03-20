@@ -1,25 +1,36 @@
-export function getRoomIdFromHash(): string | null {
-  const raw = window.location.hash.replace(/^#/, "").trim();
+function buildUrlWithoutHash(): string {
+  return `${window.location.pathname}${window.location.search}`;
+}
 
-  if (raw.length === 0) {
+export function getRoomIdFromHash(): string | null {
+  const rawHash = window.location.hash;
+
+  if (rawHash.length <= 1) {
     return null;
   }
 
-  return raw;
+  const value = rawHash.slice(1).trim();
+
+  if (value.length === 0) {
+    return null;
+  }
+
+  return decodeURIComponent(value);
 }
 
 export function setRoomIdHash(roomId: string): void {
-  const normalized = roomId.trim();
+  const trimmedRoomId = roomId.trim();
 
-  if (normalized.length === 0) {
+  if (trimmedRoomId.length === 0) {
     clearRoomIdHash();
     return;
   }
 
-  window.location.hash = normalized;
+  const nextUrl = `${buildUrlWithoutHash()}#${encodeURIComponent(trimmedRoomId)}`;
+  window.history.replaceState(null, "", nextUrl);
 }
 
 export function clearRoomIdHash(): void {
-  const url = `${window.location.pathname}${window.location.search}`;
-  window.history.replaceState(null, "", url);
+  const nextUrl = buildUrlWithoutHash();
+  window.history.replaceState(null, "", nextUrl);
 }

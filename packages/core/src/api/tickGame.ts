@@ -174,16 +174,31 @@ function preparePlayersForNextRound(state: GameState): readonly PlayerState[] {
       };
     }
 
-    const defaultBet =
-      player.balance >= state.config.minBet
-        ? Math.min(state.config.minBet, state.config.maxBet, player.balance)
-        : 0;
-
     return {
       ...player,
-      currentBet: defaultBet,
+      currentBet: 0,
       lastWin: 0,
     };
+  });
+}
+
+function haveAllActivePlayersPlacedBets(state: GameState): boolean {
+  const activePlayers = state.players.filter(
+    (player) => player.isConnected === true && player.isEliminated === false,
+  );
+
+  if (activePlayers.length === 0) {
+    return false;
+  }
+
+  return activePlayers.every((player) => {
+    const bet = sanitizeRoundBet(
+      state.config.minBet,
+      state.config.maxBet,
+      player,
+    );
+
+    return bet > 0;
   });
 }
 
@@ -199,8 +214,12 @@ export function tickGame(state: GameState, now: number): GameState {
 
     case "betting": {
       const bettingClosesAt = state.round.bettingClosesAt;
+      const shouldSpinNow =
+        haveAllActivePlayersPlacedBets(state) ||
+        bettingClosesAt === null ||
+        now >= bettingClosesAt;
 
-      if (bettingClosesAt === null || now < bettingClosesAt) {
+      if (shouldSpinNow === false) {
         return state;
       }
 
