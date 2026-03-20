@@ -1,0 +1,323 @@
+# Project Structure
+
+## File Tree
+
+```
+├─ apps
+│  ├─ server
+│  │  └─ src
+│  │     ├─ game
+│  │     │  └─ GameLoop.ts
+│  │     ├─ http
+│  │     │  └─ createRoom.ts
+│  │     ├─ mappers
+│  │     │  └─ toRoomDto.ts
+│  │     ├─ rooms
+│  │     │  ├─ PlayerSession.ts
+│  │     │  ├─ Room.ts
+│  │     │  └─ RoomManager.ts
+│  │     ├─ ws
+│  │     │  ├─ handlers
+│  │     │  │  └─ index.ts
+│  │     │  └─ server.ts
+│  │     └─ index.ts
+│  └─ web
+│     ├─ src
+│     │  ├─ network
+│     │  │  └─ socket.ts
+│     │  └─ state
+│     │     └─ store.ts
+│     └─ vite.config.ts
+└─ packages
+   ├─ core
+   │  └─ src
+   │     ├─ api
+   │     │  ├─ applyCommand.ts
+   │     │  ├─ createGame.ts
+   │     │  ├─ getPublicState.ts
+   │     │  └─ tickGame.ts
+   │     ├─ engine
+   │     │  ├─ Payout.ts
+   │     │  ├─ RNG.ts
+   │     │  └─ SlotEngine.ts
+   │     ├─ game
+   │     │  ├─ GameState.ts
+   │     │  ├─ Player.ts
+   │     │  ├─ Round.ts
+   │     │  └─ Rules.ts
+   │     └─ index.ts
+   ├─ protocol
+   │  └─ src
+   │     ├─ events
+   │     │  ├─ client.ts
+   │     │  └─ server.ts
+   │     ├─ schemas
+   │     │  └─ index.ts
+   │     ├─ types
+   │     │  ├─ GameStateDTO.ts
+   │     │  ├─ PlayerDTO.ts
+   │     │  └─ RoomDTO.ts
+   │     └─ index.ts
+   └─ shared
+      └─ src
+         ├─ constants
+         │  └─ rooms.ts
+         ├─ utils
+         │  └─ randomId.ts
+         └─ index.ts
+```
+
+## File Index
+
+### apps/server/src/game/GameLoop.ts
+
+Classes:
+- GameLoop
+
+### apps/server/src/http/createRoom.ts
+
+Exported Functions:
+- registerCreateRoomRoute(app, roomManager)
+
+Types:
+- CreateRoomResponse
+
+### apps/server/src/index.ts
+
+Internal Functions:
+- bootstrap()
+
+### apps/server/src/mappers/toRoomDto.ts
+
+Exported Functions:
+- toGameStateDto(game)
+- toRoomDto(args)
+
+### apps/server/src/rooms/PlayerSession.ts
+
+Classes:
+- PlayerSession
+
+Types:
+- PlayerSessionSnapshot
+
+### apps/server/src/rooms/Room.ts
+
+Classes:
+- Room
+
+Types:
+- RoomSnapshot
+- RoomSubscriber
+
+### apps/server/src/rooms/RoomManager.ts
+
+Classes:
+- RoomManager
+
+### apps/server/src/ws/handlers/index.ts
+
+Exported Functions:
+- registerSocketHandlers(socket, roomManager)
+
+Internal Functions:
+- cleanupConnection(context)
+- handleBet(context, event)
+- handleJoin(context, event)
+- handleLeave(context)
+- handleReady(context, event)
+- handleStart(context, event)
+- send(socket, event)
+- subscribeToRoom(context, room)
+
+Types:
+- ConnectionContext
+
+### apps/server/src/ws/server.ts
+
+Exported Functions:
+- attachWebSocketServer(app, roomManager)
+
+### apps/web/src/network/socket.ts
+
+Exported Functions:
+- createSocket(url)
+
+### apps/web/src/state/store.ts
+
+Types:
+- ClientStore
+
+### apps/web/vite.config.ts
+
+### packages/core/src/api/applyCommand.ts
+
+Exported Functions:
+- applyCommand(state, command)
+
+Internal Functions:
+- canStartGame(state)
+- createBettingRound(state, now)
+- replacePlayer(players, playerId, update)
+- sanitizeBet(state, amount, balance)
+
+Types:
+- GameCommand
+
+### packages/core/src/api/createGame.ts
+
+Exported Functions:
+- createGame(args)
+
+Internal Functions:
+- mergeConfig(overrides)
+
+### packages/core/src/api/getPublicState.ts
+
+Exported Functions:
+- getPublicState(state)
+
+Types:
+- PublicGameState
+- PublicPlayerState
+- PublicRoundState
+- PublicSpinResult
+- PublicWinningLine
+
+### packages/core/src/api/tickGame.ts
+
+Exported Functions:
+- tickGame(state, now)
+
+Internal Functions:
+- buildSpinResult(state)
+- createBettingRound(state, now)
+- getAlivePlayers(players)
+- getWinnerPlayerId(state, players)
+- normalizeBetsForSpin(state)
+- preparePlayersForNextRound(state)
+- resolveBalances(state, result)
+- sanitizeRoundBet(minBet, maxBet, player)
+- shouldFinishGame(state, players)
+
+### packages/core/src/engine/Payout.ts
+
+Classes:
+- PayoutCalculator
+
+Types:
+- PayoutResult
+
+### packages/core/src/engine/RNG.ts
+
+Classes:
+- RNG
+
+### packages/core/src/engine/SlotEngine.ts
+
+Classes:
+- SlotEngine
+
+### packages/core/src/game/GameState.ts
+
+Exported Functions:
+- getActivePlayers(state)
+- getPlayerById(state, playerId)
+
+Types:
+- GameId
+- GameState
+
+### packages/core/src/game/Player.ts
+
+Exported Functions:
+- createPlayer(args)
+
+Types:
+- PlayerId
+- PlayerState
+
+### packages/core/src/game/Round.ts
+
+Exported Functions:
+- createRound(seed)
+
+Types:
+- RoundState
+- SpinGrid
+- SpinResult
+- WinningLine
+
+### packages/core/src/game/Rules.ts
+
+Types:
+- GameConfig
+- GameStatus
+- Payline
+- Paytable
+- RoundStatus
+- SymbolId
+
+### packages/core/src/index.ts
+
+### packages/protocol/src/events/client.ts
+
+Types:
+- ClientEvent
+- JoinRoomEvent
+- LeaveRoomEvent
+- SetBetEvent
+- SetReadyEvent
+- StartGameEvent
+
+### packages/protocol/src/events/server.ts
+
+Types:
+- ErrorEvent
+- JoinedRoomEvent
+- LeftRoomEvent
+- RoomStateEvent
+- ServerEvent
+
+### packages/protocol/src/index.ts
+
+### packages/protocol/src/schemas/index.ts
+
+Types:
+- GameStateSchema
+- PlayerSchema
+- RoomSchema
+- RoundSchema
+- SpinResultSchema
+- SymbolIdSchema
+- WinningLineSchema
+
+### packages/protocol/src/types/GameStateDTO.ts
+
+Types:
+- GameStateDTO
+- GameStatusDTO
+- RoundDTO
+- RoundStatusDTO
+- SpinResultDTO
+- SymbolIdDTO
+- WinningLineDTO
+
+### packages/protocol/src/types/PlayerDTO.ts
+
+Types:
+- PlayerDTO
+
+### packages/protocol/src/types/RoomDTO.ts
+
+Types:
+- RoomDTO
+
+### packages/shared/src/constants/rooms.ts
+
+### packages/shared/src/index.ts
+
+### packages/shared/src/utils/randomId.ts
+
+Exported Functions:
+- randomId()

@@ -1,0 +1,23 @@
+{
+  "name": "catspin-arena",
+  "private": true,
+  "version": "0.1.0",
+  "packageManager": "pnpm@10.6.0",
+  "scripts": {
+    "build": "pnpm -r build",
+    "dev": "pnpm --parallel --filter @catspin/server --filter @catspin/web dev",
+    "dev:server": "pnpm --filter @catspin/server dev",
+    "dev:web": "pnpm --filter @catspin/web dev",
+    "typecheck": "pnpm -r typecheck",
+    "structure": "node tools/structure.mjs",
+    "clean": "pnpm -r exec rimraf dist .turbo"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "rimraf": "^6.0.1",
+    "typescript": "^5.8.2"
+  },
+  "dependencies": {
+    "fast-glob": "^3.3.3"
+  }
+}
