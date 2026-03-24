@@ -36,7 +36,7 @@ export function BetControls(props: BetControlsProps) {
   const safeValue = clamp(value ?? min, min, safeMax);
   const stepsCount = Math.floor((safeMax - min) / safeStep) + 1;
 
-  const getValueFromClientY = (clientY: number): number => {
+  const getValueFromPointer = (clientX: number, clientY: number): number => {
     const element = stackRef.current;
 
     if (element === null) {
@@ -44,20 +44,31 @@ export function BetControls(props: BetControlsProps) {
     }
 
     const rect = element.getBoundingClientRect();
+    const isHorizontal = rect.width > rect.height;
+
+    if (isHorizontal) {
+      const offsetX = clamp(clientX - rect.left, 0, rect.width);
+      const ratio = rect.width === 0 ? 0 : offsetX / rect.width;
+      const rawIndex = Math.round(ratio * (stepsCount - 1));
+      const index = clamp(rawIndex, 0, stepsCount - 1);
+
+      return min + index * safeStep;
+    }
+
     const offsetY = clamp(clientY - rect.top, 0, rect.height);
-    const ratioFromBottom = 1 - offsetY / rect.height;
+    const ratioFromBottom = rect.height === 0 ? 0 : 1 - offsetY / rect.height;
     const rawIndex = Math.round(ratioFromBottom * (stepsCount - 1));
     const index = clamp(rawIndex, 0, stepsCount - 1);
 
     return min + index * safeStep;
   };
 
-  const updateFromPointer = (clientY: number): void => {
+  const updateFromPointer = (clientX: number, clientY: number): void => {
     if (disabled) {
       return;
     }
 
-    onChange(getValueFromClientY(clientY));
+    onChange(getValueFromPointer(clientX, clientY));
   };
 
   const handlePointerDown = (
@@ -68,7 +79,7 @@ export function BetControls(props: BetControlsProps) {
     }
 
     event.currentTarget.setPointerCapture(event.pointerId);
-    updateFromPointer(event.clientY);
+    updateFromPointer(event.clientX, event.clientY);
   };
 
   const handlePointerMove = (
@@ -78,7 +89,7 @@ export function BetControls(props: BetControlsProps) {
       return;
     }
 
-    updateFromPointer(event.clientY);
+    updateFromPointer(event.clientX, event.clientY);
   };
 
   const handlePointerUp = (event: React.PointerEvent<HTMLDivElement>): void => {
@@ -87,7 +98,7 @@ export function BetControls(props: BetControlsProps) {
     }
 
     if (!disabled) {
-      onSubmit(); // 🔥 ось тут робимо ставку
+      onSubmit();
     }
   };
 
@@ -101,7 +112,7 @@ export function BetControls(props: BetControlsProps) {
         className={active ? "bet-step is-active" : "bet-step"}
       />
     );
-  }).reverse();
+  });
 
   return (
     <div className="bet-controls">

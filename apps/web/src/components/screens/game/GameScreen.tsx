@@ -67,34 +67,36 @@ export function GameScreen(props: GameScreenProps) {
         </button>
       }
     >
-      <div className="game-board">
-        <SlotMachine
-          grid={displayGrid}
-          isSpinning={isSpinning}
-          winningLines={winningLines}
-        />
+      <div className="game-layout">
+        <div className="game-board">
+          <SlotMachine
+            grid={displayGrid}
+            isSpinning={isSpinning}
+            winningLines={winningLines}
+          />
 
-        <BetControls
-          value={betInput}
-          disabled={!isBetting}
-          onChange={onBetInputChange}
-          onSubmit={onSetBet}
-          min={minBet}
-          max={maxBet}
-          step={minBet}
-        />
-      </div>
+          <BetControls
+            value={betInput}
+            disabled={!isBetting}
+            onChange={onBetInputChange}
+            onSubmit={onSetBet}
+            min={minBet}
+            max={maxBet}
+            step={minBet}
+          />
+        </div>
 
-      <div className="game-players-scroll">
-        <div className="game-players">
-          {room.game.players.map((player) => (
-            <PlayerItem
-              key={player.id}
-              player={player}
-              isCurrent={player.id === playerId}
-              isHost={room.game.hostPlayerId === player.id}
-            />
-          ))}
+        <div className="game-players-scroll">
+          <div className="game-players">
+            {room.game.players.map((player) => (
+              <PlayerItem
+                key={player.id}
+                player={player}
+                isCurrent={player.id === playerId}
+                isHost={room.game.hostPlayerId === player.id}
+              />
+            ))}
+          </div>
         </div>
       </div>
 

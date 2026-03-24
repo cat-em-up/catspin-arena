@@ -1,9 +1,33 @@
+:root {
+  --bet-step-size: 10%;
+  --bet-control-rail: 44px;
+  --game-sidebar-width: 360px;
+}
+
 /* game screen */
+
+.game-screen {
+  gap: var(--space-4);
+}
+
+.game-screen > .game-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-4);
+  min-height: 0;
+}
+
+.game-status {
+  font-size: 0.95rem;
+}
+
+/* default layout */
 
 .game-board {
   display: flex;
   align-items: stretch;
   gap: var(--space-3);
+  min-width: 0;
 }
 
 .game-board > .slot-machine {
@@ -20,16 +44,6 @@
   display: grid;
   gap: var(--space-3);
   list-style: none;
-}
-
-.game-status {
-  font-size: 0.95rem;
-}
-
-@media (min-width: 640px) {
-  .game-players {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
 }
 
 /* player card */
@@ -155,20 +169,22 @@
 
 .bet-controls {
   display: flex;
-  flex: 0 0 40px;
+  flex: 0 0 var(--bet-control-rail);
   flex-direction: column;
   align-items: center;
-  gap: var(--space-2);
+  justify-content: stretch;
+  width: var(--bet-control-rail);
 }
 
 .bet-stack {
   position: relative;
   display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
+  flex-direction: column-reverse;
+  justify-content: flex-start;
   width: 100%;
-  flex: 1 1 auto;
+  min-height: 160px;
   max-height: 260px;
+  flex: 1 1 auto;
   touch-action: none;
   user-select: none;
   cursor: ns-resize;
@@ -176,11 +192,9 @@
 
 .bet-step {
   width: 100%;
-  height: 10%;
-  min-height: auto;
-  flex: 0 0 auto;
+  height: var(--bet-step-size);
+  flex: 0 0 var(--bet-step-size);
   border: 0;
-  padding: 0;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.12);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
@@ -210,4 +224,67 @@
   font-size: 0.95rem;
   color: var(--color-text);
   pointer-events: none;
+}
+
+/* wide layout */
+@media (min-width: 560px) {
+  .game-screen > .game-layout {
+    grid-template-columns: minmax(0, 1fr) minmax(280px, 360px);
+    align-items: start;
+  }
+
+  .game-board {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto;
+    grid-column: 1;
+    grid-row: 1;
+    gap: var(--space-3);
+    min-width: 0;
+  }
+
+  .game-board > .slot-machine {
+    grid-column: 1;
+    grid-row: 1;
+    min-width: 0;
+  }
+
+  .game-board > .bet-controls {
+    grid-column: 1;
+    grid-row: 2;
+    width: 100%;
+    height: var(--bet-control-rail);
+    flex: 0 0 auto;
+  }
+
+  .game-players-scroll {
+    grid-column: 2;
+    grid-row: 1;
+    align-self: start;
+    height: calc(100vh - 170px);
+    overflow-y: auto;
+  }
+
+  .bet-controls {
+    width: 100%;
+    height: var(--bet-control-rail);
+    flex: 0 0 auto;
+  }
+
+  .bet-stack {
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+    height: 42px;
+    min-height: 0;
+    max-height: none;
+    cursor: ew-resize;
+  }
+
+  .bet-step {
+    width: auto;
+    height: 100%;
+    flex: 1 1 0;
+  }
 }
