@@ -1,7 +1,6 @@
 import type { RoomDTO } from "@catspin/protocol";
 import type { PlayerView } from "../../types/playerView";
 import { Section } from "../layout/Section";
-import { PlayerItem } from "../common/PlayerItem";
 
 type LobbyScreenProps = {
   readonly room: RoomDTO;
@@ -27,48 +26,66 @@ export function LobbyScreen(props: LobbyScreenProps) {
   } = props;
 
   return (
-    <>
-      <Section title="Lobby">
-        <div className="lobby-screen">
-          <div className="room-code">Room code: {room.id}</div>
+    <Section
+      title={`Room ${room.id}`}
+      className="lobby"
+      actions={
+        <>
+          <button
+            type="button"
+            onClick={onToggleReady}
+            disabled={currentPlayer === null}
+          >
+            {currentPlayer?.isReady ? "Unready" : "Ready"}
+          </button>
 
-          <div className="actions">
-            <button
-              type="button"
-              onClick={onToggleReady}
-              disabled={currentPlayer === null}
-            >
-              {currentPlayer?.isReady ? "Unready" : "Ready"}
+          {isHost ? (
+            <button type="button" onClick={onStartGame}>
+              Start
             </button>
+          ) : null}
 
-            {isHost && (
-              <button type="button" onClick={onStartGame}>
-                Start game
-              </button>
-            )}
+          <button type="button" onClick={onLeaveRoom}>
+            Leave
+          </button>
+        </>
+      }
+    >
+      <ul className="players">
+        {players.map((player) => (
+          <li
+            key={player.id}
+            className="player"
+            data-current={player.id === playerId}
+            data-online={player.isConnected}
+          >
+            <div className="player-row">
+              <div className="player-left">
+                <span className="player-name">{player.name}</span>
 
-            <button type="button" onClick={onLeaveRoom}>
-              Leave room
-            </button>
-          </div>
-        </div>
-      </Section>
+                {player.id === playerId ? (
+                  <span className="badge">you</span>
+                ) : null}
 
-      <Section title="Players">
-        <div className="players-list">
-          <ul>
-            {players.map((player) => (
-              <PlayerItem
-                key={player.id}
-                player={player}
-                isCurrent={player.id === playerId}
-                isHost={room.game.hostPlayerId === player.id}
-                variant="lobby"
-              />
-            ))}
-          </ul>
-        </div>
-      </Section>
-    </>
+                {room.game.hostPlayerId === player.id ? (
+                  <span className="badge">host</span>
+                ) : null}
+              </div>
+
+              <div className="player-right">
+                <span
+                  className="status-dot"
+                  data-state={player.isConnected ? "connected" : "disconnected"}
+                />
+
+                <span className={player.isReady ? "badge is-success" : "badge"}>
+                  {player.isReady ? "ready" : "not ready"}
+                </span>
+              </div>
+            </div>
+          </li>
+        ))}
+      </ul>
+    </Section>
   );
 }

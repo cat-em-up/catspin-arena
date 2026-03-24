@@ -31,7 +31,6 @@ export type ClientStore = {
   setReady: (ready: boolean) => void;
   setBet: (amount: number) => void;
   startGame: () => void;
-  setFooter: (primaryText: string, secondaryText?: string) => void;
   clearFooter: () => void;
 };
 
@@ -178,15 +177,6 @@ export function createClientStore(
 
     startGame: () => {
       client.startGame();
-    },
-
-    setFooter: (primaryText, secondaryText) => {
-      setState({
-        footer: {
-          primaryText,
-          secondaryText,
-        },
-      });
     },
 
     clearFooter: () => {

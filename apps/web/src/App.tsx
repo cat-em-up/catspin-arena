@@ -10,9 +10,8 @@ import type { PlayerView } from "./types/playerView";
 import { NameScreen } from "./components/screens/NameScreen";
 import { RoomSetupScreen } from "./components/screens/RoomSetupScreen";
 import { LobbyScreen } from "./components/screens/LobbyScreen";
-import { GameScreen } from "./components/screens/GameScreen";
-import { AppHeader } from "./components/layout/AppHeader";
-import { AppFooter } from "./components/layout/AppFooter";
+import { GameScreen } from "./components/screens/game/GameScreen";
+import { Header } from "./components/layout/Header";
 
 import "./styles/index.css";
 
@@ -223,74 +222,70 @@ export default function App() {
   };
 
   return (
-    <div className="app-shell">
-      <div className="app-background" />
-
-      <div className="app-chrome">
-        <AppHeader
+    <div className="app">
+      <div className="shell">
+        <Header
           connectionStatus={state.connectionStatus}
           playerName={trimmedPlayerName}
           onChangeName={handleStartEditingName}
         />
 
-        <main className="app-main">
-          {state.error !== null ? (
-            <div className="app-error-banner">{state.error}</div>
+        {state.error !== null ? (
+          <div className="section">
+            <div className="badge danger">{state.error}</div>
+          </div>
+        ) : null}
+
+        <main className="stack">
+          {screen === "name" ? (
+            <NameScreen
+              initialValue={state.playerName ?? ""}
+              onSubmit={handleSetPlayerName}
+              onCancel={handleCancelEditingName}
+            />
           ) : null}
 
-          <div className="app-content">
-            {screen === "name" ? (
-              <NameScreen
-                initialValue={state.playerName ?? ""}
-                onSubmit={handleSetPlayerName}
-                onCancel={handleCancelEditingName}
-              />
-            ) : null}
+          {screen === "room_setup" ? (
+            <RoomSetupScreen
+              roomInput={roomInput}
+              onRoomInputChange={(value) => {
+                setRoomInput(value);
+                autoJoinAttemptedRef.current = false;
+              }}
+              onCreateRoom={handleCreateRoom}
+              onJoinRoom={handleJoinRoom}
+              canCreate={canCreate}
+              canJoin={canJoin}
+            />
+          ) : null}
 
-            {screen === "room_setup" ? (
-              <RoomSetupScreen
-                roomInput={roomInput}
-                onRoomInputChange={(value) => {
-                  setRoomInput(value);
-                  autoJoinAttemptedRef.current = false;
-                }}
-                onCreateRoom={handleCreateRoom}
-                onJoinRoom={handleJoinRoom}
-                canCreate={canCreate}
-                canJoin={canJoin}
-              />
-            ) : null}
+          {screen === "lobby" && state.room !== null ? (
+            <LobbyScreen
+              room={state.room}
+              playerId={state.playerId}
+              currentPlayer={currentPlayer}
+              players={players}
+              isHost={isHost}
+              onToggleReady={() =>
+                store.setReady(!(currentPlayer?.isReady ?? false))
+              }
+              onStartGame={() => store.startGame()}
+              onLeaveRoom={handleLeaveRoom}
+            />
+          ) : null}
 
-            {screen === "lobby" && state.room !== null ? (
-              <LobbyScreen
-                room={state.room}
-                playerId={state.playerId}
-                currentPlayer={currentPlayer}
-                players={players}
-                isHost={isHost}
-                onToggleReady={() =>
-                  store.setReady(!(currentPlayer?.isReady ?? false))
-                }
-                onStartGame={() => store.startGame()}
-                onLeaveRoom={handleLeaveRoom}
-              />
-            ) : null}
-
-            {screen === "game" && state.room !== null ? (
-              <GameScreen
-                room={state.room}
-                playerId={state.playerId}
-                currentPlayer={currentPlayer}
-                betInput={betInput}
-                onBetInputChange={setBetInput}
-                onSetBet={() => store.setBet(betInput)}
-                onLeaveRoom={handleLeaveRoom}
-              />
-            ) : null}
-          </div>
+          {screen === "game" && state.room !== null ? (
+            <GameScreen
+              room={state.room}
+              playerId={state.playerId}
+              currentPlayer={currentPlayer}
+              betInput={betInput}
+              onBetInputChange={setBetInput}
+              onSetBet={() => store.setBet(betInput)}
+              onLeaveRoom={handleLeaveRoom}
+            />
+          ) : null}
         </main>
-
-        <AppFooter />
       </div>
     </div>
   );

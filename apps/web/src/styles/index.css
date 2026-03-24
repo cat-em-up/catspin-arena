@@ -1,13 +1,11 @@
-@import "./app.css";
-@import "./section.css";
-@import "./ui.css";
-
+@import "./tokens.css";
+@import "./reset.css";
+@import "./base.css";
+@import "./layout.css";
+@import "./forms.css";
+@import "./surfaces.css";
 @import "./header.css";
-@import "./footer.css";
-@import "./player-item.css";
 @import "./name-screen.css";
 @import "./room-setup-screen.css";
 @import "./lobby-screen.css";
 @import "./game-screen.css";
-@import "./slot-machine.css";
-@import "./bet-controls.css";

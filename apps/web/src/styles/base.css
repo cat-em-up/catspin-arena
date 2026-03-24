@@ -1,0 +1,45 @@
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  background:
+    radial-gradient(circle at top, rgba(245, 184, 46, 0.08), transparent 30%),
+    linear-gradient(180deg, #11141d 0%, #0b0e14 100%);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  line-height: var(--line-height);
+}
+
+#root {
+  width: 100%;
+}
+
+a {
+  color: inherit;
+}
+
+strong {
+  font-weight: 700;
+}
+
+::selection {
+  background: rgba(124, 156, 255, 0.32);
+}
+
+:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-focus);
+}
+
+body > * {
+  width: 100%;
+}
+
+main,
+.app-shell {
+  width: min(100% - 32px, var(--container-width));
+  margin: 0 auto;
+}

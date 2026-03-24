@@ -1,10 +1,37 @@
 .name-screen {
-  display: grid;
-  gap: 12px;
-  max-width: 360px;
+  gap: var(--space-4);
 }
 
-.name-screen .actions {
+.name-row {
   display: flex;
-  gap: 8px;
+  gap: var(--space-3);
+  align-items: stretch;
+}
+
+.name-row > input {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.name-row > button {
+  flex: 0 0 auto;
+}
+
+.name-secondary {
+  display: flex;
+  justify-content: flex-start;
+}
+
+@media (max-width: 640px) {
+  .name-row {
+    flex-wrap: wrap;
+  }
+
+  .name-row > input {
+    flex: 1 1 100%;
+  }
+
+  .name-row > button {
+    width: 100%;
+  }
 }

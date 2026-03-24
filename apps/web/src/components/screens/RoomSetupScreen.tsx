@@ -20,27 +20,27 @@ export function RoomSetupScreen(props: RoomSetupScreenProps) {
   } = props;
 
   return (
-    <Section title="Create or join room">
-      <div className="room-setup-screen">
-        <div className="room-setup-row">
-          <input
-            value={roomInput}
-            onChange={(event) => onRoomInputChange(event.target.value)}
-            placeholder="Room ID"
-            onKeyDown={(event) => {
-              if (event.key === "Enter" && canJoin) {
-                onJoinRoom();
-              }
-            }}
-          />
-
-          <button type="button" onClick={onJoinRoom} disabled={!canJoin}>
-            Join room
-          </button>
-        </div>
-
+    <Section title="Create or join room" className="room-setup">
+      <div className="create-row">
         <button type="button" onClick={onCreateRoom} disabled={!canCreate}>
           Create room
+        </button>
+      </div>
+
+      <div className="join-row">
+        <input
+          value={roomInput}
+          onChange={(event) => onRoomInputChange(event.target.value)}
+          placeholder="Room ID"
+          onKeyDown={(event) => {
+            if (event.key === "Enter" && canJoin) {
+              onJoinRoom();
+            }
+          }}
+        />
+
+        <button type="button" onClick={onJoinRoom} disabled={!canJoin}>
+          Join room
         </button>
       </div>
     </Section>

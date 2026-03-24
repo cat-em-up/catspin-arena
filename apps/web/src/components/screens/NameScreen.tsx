@@ -12,7 +12,6 @@ export function NameScreen(props: NameScreenProps) {
 
   const [name, setName] = useState<string>(initialValue);
 
-  // sync with external state
   useEffect(() => {
     setName(initialValue);
   }, [initialValue]);
@@ -29,13 +28,13 @@ export function NameScreen(props: NameScreenProps) {
   };
 
   const handleCancel = (): void => {
-    setName(initialValue); // rollback input
+    setName(initialValue);
     onCancel();
   };
 
   return (
-    <Section title="Enter name">
-      <div className="name-screen">
+    <Section title="Enter name" className="name-screen">
+      <div className="name-row">
         <input
           value={name}
           autoFocus
@@ -49,14 +48,22 @@ export function NameScreen(props: NameScreenProps) {
           }}
         />
 
-        <div className="actions">
-          <button onClick={handleSubmit} disabled={trimmedName.length === 0}>
-            Continue
-          </button>
-
-          {hasInitialValue && <button onClick={handleCancel}>Cancel</button>}
-        </div>
+        <button
+          type="button"
+          onClick={handleSubmit}
+          disabled={trimmedName.length === 0}
+        >
+          Continue
+        </button>
       </div>
+
+      {hasInitialValue ? (
+        <div className="name-secondary">
+          <button type="button" onClick={handleCancel}>
+            Cancel
+          </button>
+        </div>
+      ) : null}
     </Section>
   );
 }

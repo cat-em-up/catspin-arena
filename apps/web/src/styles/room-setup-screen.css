@@ -1,20 +1,32 @@
-.room-setup-screen {
-  display: grid;
-  gap: 12px;
-  max-width: 420px;
+.room-setup {
+  gap: var(--space-4);
 }
 
-.room-setup-row {
+.create-row,
+.join-row {
   display: flex;
-  gap: 8px;
+  gap: var(--space-3);
 }
 
-.room-setup-row input {
-  flex: 1;
+.create-row > button {
+  width: 100%;
+}
+
+.join-row > button {
+  flex: 0 0 auto;
+}
+
+.join-row > input {
+  flex: 1 1 auto;
 }
 
 @media (max-width: 640px) {
-  .room-setup-row {
+  .join-row {
     flex-direction: column;
+  }
+
+  .join-row > button,
+  .join-row > input {
+    width: 100%;
   }
 }

@@ -83,8 +83,7 @@ export function SlotMachine(props: SlotMachineProps) {
   const { grid, isSpinning, winningLines } = props;
 
   const normalizedGrid = useMemo<SymbolIdDTO[][] | null>(() => {
-    const nextGrid = normalizeGrid(grid);
-    return nextGrid;
+    return normalizeGrid(grid);
   }, [grid]);
 
   const winningCells = useMemo(() => {
@@ -126,15 +125,17 @@ export function SlotMachine(props: SlotMachineProps) {
   const hasRenderableGrid = displayGrid.length > 0;
 
   return (
-    <div className="slot">
+    <div className="slot-machine stack">
       {!hasRenderableGrid ? (
-        <div className="slot-empty">No grid</div>
+        <div className="slot-empty card muted">No grid</div>
       ) : (
         displayGrid.map((row, rowIndex) => (
           <div
             key={`row-${rowIndex}`}
             className="slot-row"
-            style={{ gridTemplateColumns: `repeat(${row.length}, 72px)` }}
+            style={{
+              gridTemplateColumns: `repeat(${row.length}, minmax(0, 1fr))`,
+            }}
           >
             {row.map((symbol, colIndex) => {
               const isWinningCell =
@@ -143,7 +144,8 @@ export function SlotMachine(props: SlotMachineProps) {
               return (
                 <div
                   key={`${rowIndex}-${colIndex}`}
-                  className={`slot-cell${isWinningCell ? " win" : ""}`}
+                  className="slot-cell"
+                  data-win={isWinningCell}
                 >
                   {SLOT_SYMBOL_VIEW[symbol]}
                 </div>

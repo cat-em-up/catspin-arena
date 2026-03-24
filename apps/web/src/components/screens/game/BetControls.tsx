@@ -1,0 +1,125 @@
+import { useRef } from "react";
+
+type BetControlsProps = {
+  readonly value?: number;
+  readonly min?: number;
+  readonly max: number;
+  readonly step?: number;
+  readonly disabled: boolean;
+  readonly onChange: (value: number) => void;
+  readonly onSubmit: () => void;
+};
+
+function clamp(value: number, min: number, max: number): number {
+  if (Number.isFinite(value) === false) {
+    return min;
+  }
+
+  return Math.min(Math.max(value, min), max);
+}
+
+export function BetControls(props: BetControlsProps) {
+  const {
+    value,
+    min = 10,
+    max,
+    step = 10,
+    disabled,
+    onChange,
+    onSubmit,
+  } = props;
+
+  const stackRef = useRef<HTMLDivElement | null>(null);
+
+  const safeMax = Math.max(min, max);
+  const safeStep = Math.max(1, step);
+  const safeValue = clamp(value ?? min, min, safeMax);
+  const stepsCount = Math.floor((safeMax - min) / safeStep) + 1;
+
+  const getValueFromClientY = (clientY: number): number => {
+    const element = stackRef.current;
+
+    if (element === null) {
+      return safeValue;
+    }
+
+    const rect = element.getBoundingClientRect();
+    const offsetY = clamp(clientY - rect.top, 0, rect.height);
+    const ratioFromBottom = 1 - offsetY / rect.height;
+    const rawIndex = Math.round(ratioFromBottom * (stepsCount - 1));
+    const index = clamp(rawIndex, 0, stepsCount - 1);
+
+    return min + index * safeStep;
+  };
+
+  const updateFromPointer = (clientY: number): void => {
+    if (disabled) {
+      return;
+    }
+
+    onChange(getValueFromClientY(clientY));
+  };
+
+  const handlePointerDown = (
+    event: React.PointerEvent<HTMLDivElement>,
+  ): void => {
+    if (disabled) {
+      return;
+    }
+
+    event.currentTarget.setPointerCapture(event.pointerId);
+    updateFromPointer(event.clientY);
+  };
+
+  const handlePointerMove = (
+    event: React.PointerEvent<HTMLDivElement>,
+  ): void => {
+    if (disabled || event.buttons === 0) {
+      return;
+    }
+
+    updateFromPointer(event.clientY);
+  };
+
+  const handlePointerUp = (event: React.PointerEvent<HTMLDivElement>): void => {
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    }
+
+    if (!disabled) {
+      onSubmit(); // 🔥 ось тут робимо ставку
+    }
+  };
+
+  const steps = Array.from({ length: stepsCount }, (_, index) => {
+    const itemValue = min + index * safeStep;
+    const active = itemValue <= safeValue;
+
+    return (
+      <div
+        key={itemValue}
+        className={active ? "bet-step is-active" : "bet-step"}
+      />
+    );
+  }).reverse();
+
+  return (
+    <div className="bet-controls">
+      <div
+        ref={stackRef}
+        className="bet-stack"
+        role="slider"
+        aria-valuemin={min}
+        aria-valuemax={safeMax}
+        aria-valuenow={safeValue}
+        aria-disabled={disabled}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+      >
+        {steps}
+        <div className="bet-value">{safeValue}</div>
+      </div>
+    </div>
+  );
+}
