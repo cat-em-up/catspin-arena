@@ -51,18 +51,18 @@
   background: var(--color-text-muted);
 }
 
-.app-header > .user > .status[data-status="connected"] {
+.app-header > .user > .status[data-status='connected'] {
   background: var(--color-success);
 }
 
-.app-header > .user > .status[data-status="connecting"] {
+.app-header > .user > .status[data-status='connecting'] {
   background: var(--color-warning);
 }
 
-.app-header > .user > .status[data-status="disconnected"] {
+.app-header > .user > .status[data-status='disconnected'] {
   background: var(--color-text-muted);
 }
 
-.app-header > .user > .status[data-status="error"] {
+.app-header > .user > .status[data-status='error'] {
   background: var(--color-danger);
 }

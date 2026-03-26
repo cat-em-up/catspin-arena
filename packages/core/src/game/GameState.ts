@@ -1,6 +1,6 @@
-import type { GameConfig, GameStatus } from "./Rules";
-import type { PlayerId, PlayerState } from "./Player";
-import type { RoundState } from "./Round";
+import type { GameConfig, GameStatus } from './Rules';
+import type { PlayerId, PlayerState } from './Player';
+import type { RoundState } from './Round';
 
 export type GameId = string;
 
@@ -16,10 +16,7 @@ export type GameState = {
   readonly startedPlayerCount: number;
 };
 
-export function getPlayerById(
-  state: GameState,
-  playerId: PlayerId,
-): PlayerState | null {
+export function getPlayerById(state: GameState, playerId: PlayerId): PlayerState | null {
   return state.players.find((player) => player.id === playerId) ?? null;
 }
 

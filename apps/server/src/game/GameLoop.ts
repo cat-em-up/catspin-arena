@@ -1,4 +1,4 @@
-import { RoomManager } from "../rooms/RoomManager";
+import { RoomManager } from '../rooms/RoomManager';
 
 export class GameLoop {
   private readonly roomManager: RoomManager;

@@ -1,8 +1,8 @@
-import type { PlayerDTO } from "./PlayerDTO";
+import type { PlayerDTO } from './PlayerDTO';
 
-export type GameStatusDTO = "lobby" | "running" | "finished";
-export type RoundStatusDTO = "idle" | "betting" | "spinning" | "resolved";
-export type SymbolIdDTO = "L1" | "L2" | "L3" | "L4" | "M1" | "M2" | "H1" | "H2";
+export type GameStatusDTO = 'lobby' | 'running' | 'finished';
+export type RoundStatusDTO = 'idle' | 'betting' | 'spinning' | 'resolved';
+export type SymbolIdDTO = 'L1' | 'L2' | 'L3' | 'L4' | 'M1' | 'M2' | 'H1' | 'H2';
 
 export type WinningLineDTO = {
   readonly lineIndex: number;
@@ -24,6 +24,15 @@ export type RoundDTO = {
   readonly bettingClosesAt: number | null;
   readonly spinAt: number | null;
   readonly result: SpinResultDTO | null;
+  readonly winnerPlayerIds: string[];
+  readonly payoutAmount: number;
+};
+
+export type GameConfigDTO = {
+  readonly minBet: number;
+  readonly maxBet: number;
+  readonly bettingDurationMs: number;
+  readonly spinDurationMs: number;
 };
 
 export type GameStateDTO = {
@@ -33,6 +42,6 @@ export type GameStateDTO = {
   readonly winnerPlayerId: string | null;
   readonly players: PlayerDTO[];
   readonly round: RoundDTO;
-  readonly bettingDurationMs: number;
+  readonly config: GameConfigDTO;
   readonly serverNow: number;
 };

@@ -1,13 +1,5 @@
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type ReactNode,
-} from "react";
-import { createClientStore, type ClientStore } from "./store";
+import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { createClientStore, type ClientStore } from './store';
 
 const StoreContext = createContext<ClientStore | null>(null);
 
@@ -18,8 +10,8 @@ export type StoreProviderProps = {
 export function StoreProvider({ children }: StoreProviderProps) {
   const store = useMemo(() => {
     return createClientStore({
-      apiBaseUrl: "/api",
-      wsUrl: `${window.location.protocol === "https:" ? "wss" : "ws"}://${window.location.host}/ws`,
+      apiBaseUrl: '/api',
+      wsUrl: `${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${window.location.host}/ws`,
     });
   }, []);
 
@@ -39,16 +31,14 @@ export function StoreProvider({ children }: StoreProviderProps) {
     };
   }, [store]);
 
-  return (
-    <StoreContext.Provider value={store}>{children}</StoreContext.Provider>
-  );
+  return <StoreContext.Provider value={store}>{children}</StoreContext.Provider>;
 }
 
 export function useClientStore(): ClientStore {
   const store = useContext(StoreContext);
 
   if (store === null) {
-    throw new Error("StoreProvider is missing");
+    throw new Error('StoreProvider is missing');
   }
 
   return store;

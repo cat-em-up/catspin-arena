@@ -1,30 +1,23 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import type { RoomDTO } from "@catspin/protocol";
-import { useClientStore, useClientStoreState } from "./state/storeContext";
-import {
-  clearRoomIdHash,
-  getRoomIdFromHash,
-  setRoomIdHash,
-} from "./utils/roomHash";
-import type { PlayerView } from "./types/playerView";
-import { NameScreen } from "./components/screens/NameScreen";
-import { RoomSetupScreen } from "./components/screens/RoomSetupScreen";
-import { LobbyScreen } from "./components/screens/LobbyScreen";
-import { GameScreen } from "./components/screens/game/GameScreen";
-import { Header } from "./components/layout/Header";
+import { useEffect, useMemo, useRef, useState } from 'react';
+import type { RoomDTO } from '@catspin/protocol';
+import { useClientStore, useClientStoreState } from './state/storeContext';
+import { clearRoomIdHash, getRoomIdFromHash, setRoomIdHash } from './utils/roomHash';
+import type { PlayerView } from './types/playerView';
+import { NameScreen } from './components/screens/NameScreen';
+import { RoomSetupScreen } from './components/screens/RoomSetupScreen';
+import { LobbyScreen } from './components/screens/LobbyScreen';
+import { GameScreen } from './components/screens/game/GameScreen';
+import { Header } from './components/layout/Header';
 
-import "./styles/index.css";
+import './styles/index.css';
 
-type Screen = "name" | "room_setup" | "lobby" | "game";
+type Screen = 'name' | 'room_setup' | 'lobby' | 'game';
 
 function getPlayers(room: RoomDTO | null): readonly PlayerView[] {
   return room?.game.players ?? [];
 }
 
-function getCurrentPlayer(
-  room: RoomDTO | null,
-  playerId: string | null,
-): PlayerView | null {
+function getCurrentPlayer(room: RoomDTO | null, playerId: string | null): PlayerView | null {
   if (room === null || playerId === null) {
     return null;
   }
@@ -32,34 +25,28 @@ function getCurrentPlayer(
   return room.game.players.find((player) => player.id === playerId) ?? null;
 }
 
-function getScreen(
-  playerName: string | null,
-  room: RoomDTO | null,
-  isEditingName: boolean,
-): Screen {
+function getScreen(playerName: string | null, room: RoomDTO | null, isEditingName: boolean): Screen {
   if (playerName === null || playerName.trim().length === 0 || isEditingName) {
-    return "name";
+    return 'name';
   }
 
   if (room === null) {
-    return "room_setup";
+    return 'room_setup';
   }
 
-  if (room.game.status === "lobby") {
-    return "lobby";
+  if (room.game.status === 'lobby') {
+    return 'lobby';
   }
 
-  return "game";
+  return 'game';
 }
 
 export default function App() {
   const store = useClientStore();
   const state = useClientStoreState();
 
-  const [roomInput, setRoomInput] = useState<string>(
-    () => getRoomIdFromHash() ?? "",
-  );
-  const [betInput, setBetInput] = useState<number>(10);
+  const [roomInput, setRoomInput] = useState<string>(() => getRoomIdFromHash() ?? '');
+  const [betInput, setBetInput] = useState<number>(0);
   const [isEditingName, setIsEditingName] = useState<boolean>(false);
 
   const autoJoinAttemptedRef = useRef(false);
@@ -74,32 +61,29 @@ export default function App() {
     return getScreen(state.playerName, state.room, isEditingName);
   }, [state.playerName, state.room, isEditingName]);
 
-  const isHost =
-    state.room !== null &&
-    state.playerId !== null &&
-    state.room.game.hostPlayerId === state.playerId;
+  const isHost = state.room !== null && state.playerId !== null && state.room.game.hostPlayerId === state.playerId;
 
-  const trimmedPlayerName = state.playerName?.trim() ?? "";
+  const trimmedPlayerName = state.playerName?.trim() ?? '';
   const canCreate = trimmedPlayerName.length > 0;
   const canJoin = trimmedPlayerName.length > 0 && roomInput.trim().length > 0;
 
   useEffect(() => {
     const handleHashChange = (): void => {
-      const roomIdFromHash = getRoomIdFromHash() ?? "";
+      const roomIdFromHash = getRoomIdFromHash() ?? '';
       setRoomInput(roomIdFromHash);
       autoJoinAttemptedRef.current = false;
     };
 
-    window.addEventListener("hashchange", handleHashChange);
+    window.addEventListener('hashchange', handleHashChange);
 
     return () => {
-      window.removeEventListener("hashchange", handleHashChange);
+      window.removeEventListener('hashchange', handleHashChange);
     };
   }, []);
 
   useEffect(() => {
     const roomIdFromHash = getRoomIdFromHash();
-    const name = state.playerName?.trim() ?? "";
+    const name = state.playerName?.trim() ?? '';
 
     if (!roomIdFromHash) {
       return;
@@ -113,7 +97,7 @@ export default function App() {
       return;
     }
 
-    if (state.connectionStatus !== "connected") {
+    if (state.connectionStatus !== 'connected') {
       return;
     }
 
@@ -131,13 +115,7 @@ export default function App() {
       roomId: roomIdFromHash,
       name,
     });
-  }, [
-    state.connectionStatus,
-    state.playerName,
-    state.room,
-    isEditingName,
-    store,
-  ]);
+  }, [state.connectionStatus, state.playerName, state.room, isEditingName, store]);
 
   useEffect(() => {
     if (state.room !== null) {
@@ -172,7 +150,7 @@ export default function App() {
   };
 
   const handleCreateRoom = async (): Promise<void> => {
-    const name = state.playerName?.trim() ?? "";
+    const name = state.playerName?.trim() ?? '';
 
     if (name.length === 0) {
       return;
@@ -190,13 +168,13 @@ export default function App() {
         name,
       });
     } catch (error) {
-      console.error("Failed to create room", error);
+      console.error('Failed to create room', error);
     }
   };
 
   const handleJoinRoom = (): void => {
     const roomId = roomInput.trim();
-    const name = state.playerName?.trim() ?? "";
+    const name = state.playerName?.trim() ?? '';
 
     if (roomId.length === 0 || name.length === 0) {
       return;
@@ -217,7 +195,7 @@ export default function App() {
 
     setTimeout(() => {
       clearRoomIdHash();
-      setRoomInput("");
+      setRoomInput('');
     }, 100);
   };
 
@@ -237,15 +215,15 @@ export default function App() {
         ) : null}
 
         <main className="stack">
-          {screen === "name" ? (
+          {screen === 'name' ? (
             <NameScreen
-              initialValue={state.playerName ?? ""}
+              initialValue={state.playerName ?? ''}
               onSubmit={handleSetPlayerName}
               onCancel={handleCancelEditingName}
             />
           ) : null}
 
-          {screen === "room_setup" ? (
+          {screen === 'room_setup' ? (
             <RoomSetupScreen
               roomInput={roomInput}
               onRoomInputChange={(value) => {
@@ -259,22 +237,20 @@ export default function App() {
             />
           ) : null}
 
-          {screen === "lobby" && state.room !== null ? (
+          {screen === 'lobby' && state.room !== null ? (
             <LobbyScreen
               room={state.room}
               playerId={state.playerId}
               currentPlayer={currentPlayer}
               players={players}
               isHost={isHost}
-              onToggleReady={() =>
-                store.setReady(!(currentPlayer?.isReady ?? false))
-              }
+              onToggleReady={() => store.setReady(!(currentPlayer?.isReady ?? false))}
               onStartGame={() => store.startGame()}
               onLeaveRoom={handleLeaveRoom}
             />
           ) : null}
 
-          {screen === "game" && state.room !== null ? (
+          {screen === 'game' && state.room !== null ? (
             <GameScreen
               room={state.room}
               playerId={state.playerId}

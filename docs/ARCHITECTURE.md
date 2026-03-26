@@ -34,9 +34,11 @@ apps/
 ```
 
 ### `packages/core`
+
 Contains pure game logic with no transport or UI concerns.
 
 Responsibilities:
+
 - game state definitions
 - round lifecycle
 - command application
@@ -46,26 +48,32 @@ Responsibilities:
 - public-state derivation
 
 ### `packages/protocol`
+
 Contains the contract between client and server.
 
 Responsibilities:
+
 - DTO definitions
 - zod schemas
 - socket event types
 - request/response payload formats
 
 ### `packages/shared`
+
 Contains reusable helpers shared by multiple apps/packages.
 
 Responsibilities:
+
 - ids
 - utility helpers
 - cross-package small abstractions
 
 ### `apps/server`
+
 Authoritative backend.
 
 Responsibilities:
+
 - room creation
 - room lookup
 - websocket lifecycle
@@ -75,9 +83,11 @@ Responsibilities:
 - validation boundary between transport and core
 
 ### `apps/web`
+
 Realtime React client.
 
 Responsibilities:
+
 - socket connection
 - local UI flow
 - screen routing
@@ -122,12 +132,14 @@ React UI
 ## Main rule
 
 The core should remain:
+
 - deterministic
 - serializable
 - transport-agnostic
 - UI-agnostic
 
 That means no:
+
 - DOM
 - React
 - WebSocket
@@ -139,10 +151,13 @@ It only accepts input state + commands + timestamps and returns next state.
 ### Important core APIs
 
 #### `createGame()`
+
 Creates the initial game state.
 
 #### `applyCommand(state, command)`
+
 Applies player intent:
+
 - add player
 - remove player
 - set ready
@@ -152,7 +167,9 @@ Applies player intent:
 This is used for immediate, user-driven transitions.
 
 #### `tickGame(state, now)`
+
 Applies time-driven transitions:
+
 - betting -> spinning
 - spinning -> resolved
 - resolved -> next betting round
@@ -161,6 +178,7 @@ Applies time-driven transitions:
 This is used by the server game loop.
 
 #### `getPublicState(state)`
+
 Builds the safe state that may be exposed outside the core.
 
 ### Round lifecycle
@@ -177,6 +195,7 @@ idle -> betting -> spinning -> resolved -> betting -> ...
 ### Spin trigger
 
 A round enters `spinning` when:
+
 - all active connected players placed valid bets, or
 - betting timeout expires
 
@@ -184,6 +203,7 @@ A round enters `spinning` when:
 
 Spin results are generated from deterministic RNG state.
 That gives:
+
 - reproducible behavior
 - easier testing
 - predictable debugging
@@ -200,6 +220,7 @@ The server owns the live runtime.
 The server is the single source of truth.
 
 Clients may request actions, but they do not decide:
+
 - whether a command is valid
 - who may join
 - when a round advances
@@ -211,6 +232,7 @@ Clients may request actions, but they do not decide:
 A `Room` is the main runtime unit.
 
 Responsibilities:
+
 - hold authoritative `GameState`
 - manage player sessions
 - apply commands
@@ -218,6 +240,7 @@ Responsibilities:
 - broadcast room snapshots to subscribers
 
 Important methods:
+
 - `joinPlayer(...)`
 - `removePlayer(...)`
 - `disconnectPlayer(...)`
@@ -231,6 +254,7 @@ Important methods:
 A `RoomManager` owns all active rooms.
 
 Responsibilities:
+
 - create room
 - get room
 - remove room
@@ -242,12 +266,13 @@ Responsibilities:
 `GameLoop` periodically calls:
 
 ```ts
-roomManager.tickAll(now)
+roomManager.tickAll(now);
 ```
 
 This is what makes time-based state transitions actually happen.
 
 Without the game loop:
+
 - bets may update
 - room state may broadcast
 - but rounds never move forward automatically
@@ -257,6 +282,7 @@ Without the game loop:
 Transport layer handlers are intentionally thin.
 
 Responsibilities:
+
 - parse incoming messages
 - validate event shape
 - resolve room
@@ -280,10 +306,12 @@ This preserves game integrity.
 These are different events.
 
 #### Disconnect
+
 Temporary transport failure.
 The player remains part of the game but is marked offline.
 
 #### Leave
+
 Explicit user intent to leave the room.
 This is treated as permanent exit from that room flow.
 
@@ -294,12 +322,14 @@ This is treated as permanent exit from that room flow.
 Player connectivity is tracked separately from the pure game state.
 
 This is important because:
+
 - gameplay state and transport state are different concerns
 - a player can still conceptually exist in the game while temporarily offline
 
 ### `PlayerSession`
 
 Represents connection/session metadata such as:
+
 - session id
 - room id
 - player id
@@ -308,10 +338,12 @@ Represents connection/session metadata such as:
 ### Why `isConnected` is derived from sessions
 
 The final public room state merges:
+
 - gameplay info from the core state
 - connectivity info from active sessions
 
 This prevents transport-specific state from polluting pure core logic while still letting the UI show:
+
 - online/offline indicators
 - reconnect behavior
 - active-player filtering for auto-spin logic
@@ -323,7 +355,9 @@ This prevents transport-specific state from polluting pure core logic while stil
 The protocol package defines the public contract.
 
 ### Client events
+
 Examples:
+
 - `join_room`
 - `leave_room`
 - `set_ready`
@@ -331,7 +365,9 @@ Examples:
 - `start_game`
 
 ### Server events
+
 Examples:
+
 - `room_state`
 - `joined_room`
 - `left_room`
@@ -343,6 +379,7 @@ Internal core structures are not sent directly.
 Instead, the server maps them into DTOs.
 
 Benefits:
+
 - decouples internal implementation from transport
 - allows safe reshaping of public data
 - makes validation easier
@@ -359,11 +396,13 @@ The web client is a renderer plus interaction layer.
 The client is reactive, not authoritative.
 
 It should:
+
 - display the current room state
 - send player intent
 - animate transitions based on server state
 
 It should not:
+
 - generate real spin outcomes
 - compute authoritative payouts
 - decide round transitions
@@ -371,6 +410,7 @@ It should not:
 ### Client store
 
 The store owns:
+
 - connection status
 - current room
 - player id
@@ -378,6 +418,7 @@ The store owns:
 - error state
 
 The store bridges:
+
 - UI
 - HTTP room creation
 - realtime WebSocket client
@@ -385,6 +426,7 @@ The store bridges:
 ### Realtime client
 
 The realtime client wraps socket transport and is responsible for:
+
 - opening the socket
 - sending typed events
 - receiving server events
@@ -393,11 +435,13 @@ The realtime client wraps socket transport and is responsible for:
 ### Identity persistence
 
 The client persists:
+
 - `playerId` in `localStorage`
 - `sessionId` in `sessionStorage`
 - player name in local storage utilities
 
 This enables:
+
 - reconnect after refresh
 - stable player identity across browser reloads
 - improved room-link flow
@@ -413,6 +457,7 @@ Name -> Room Setup -> Lobby -> Game
 ### Game screen rendering
 
 The game screen reads:
+
 - room state
 - current round phase
 - resolved spin results
@@ -420,6 +465,7 @@ The game screen reads:
 
 Local slot animation is allowed, but only as a visual effect.
 The source of truth remains:
+
 - `round.status`
 - `round.result`
 
@@ -428,31 +474,41 @@ The source of truth remains:
 ## Important Architectural Decisions
 
 ### 1. Deterministic core
+
 Chosen to simplify:
+
 - testing
 - debugging
 - reproducibility
 - future bot/simulation support
 
 ### 2. Authoritative server
+
 Chosen to prevent:
+
 - client-side cheating
 - inconsistent room state
 - divergent round progression
 
 ### 3. DTO mapping layer
+
 Chosen to keep:
+
 - protocol stable
 - internals decoupled
 - payloads explicit
 
 ### 4. Session connectivity outside core
+
 Chosen to avoid mixing:
+
 - transport concerns
 - gameplay concerns
 
 ### 5. Monorepo with workspaces
+
 Chosen to allow:
+
 - shared types
 - fast refactors
 - consistent contracts across packages
@@ -473,6 +529,7 @@ Chosen to allow:
 ## Future Evolution
 
 ### Near-term
+
 - slot reel visuals
 - winning-line highlighting
 - better reconnect UX
@@ -480,12 +537,14 @@ Chosen to allow:
 - graceful disconnect timeout
 
 ### Mid-term
+
 - automated tests for core and server flow
 - richer round presentation
 - sound and feedback systems
 - mobile-first layout improvements
 
 ### Possible long-term
+
 - spectators
 - rematch flow
 - persistent profiles

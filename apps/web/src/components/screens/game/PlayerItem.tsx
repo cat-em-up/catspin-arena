@@ -1,4 +1,4 @@
-import type { PlayerView } from "../../../types/playerView";
+import type { PlayerView } from '../../../types/playerView';
 
 type PlayerItemProps = {
   readonly player: PlayerView;
@@ -19,16 +19,14 @@ export function PlayerItem({ player, isCurrent, isHost }: PlayerItemProps) {
           <span className="player-name">{player.name}</span>
           {isCurrent ? <span className="badge">you</span> : null}
           {isHost ? <span className="badge">host</span> : null}
-          {player.isEliminated ? (
-            <span className="badge is-danger">out</span>
-          ) : null}
+          {player.isEliminated ? <span className="badge is-danger">out</span> : null}
         </div>
 
         <span
           className="status-dot"
-          data-state={player.isConnected ? "connected" : "disconnected"}
-          aria-label={player.isConnected ? "online" : "offline"}
-          title={player.isConnected ? "online" : "offline"}
+          data-state={player.isConnected ? 'connected' : 'disconnected'}
+          aria-label={player.isConnected ? 'online' : 'offline'}
+          title={player.isConnected ? 'online' : 'offline'}
         />
       </div>
 

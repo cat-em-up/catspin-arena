@@ -1,4 +1,4 @@
-import type { GameStateDTO } from "./GameStateDTO";
+import type { GameStateDTO } from './GameStateDTO';
 
 export type RoomDTO = {
   readonly id: string;

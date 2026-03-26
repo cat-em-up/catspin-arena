@@ -1,21 +1,18 @@
-import type { FastifyInstance } from "fastify";
-import { WebSocketServer, type WebSocket } from "ws";
+import type { FastifyInstance } from 'fastify';
+import { WebSocketServer, type WebSocket } from 'ws';
 
-import type { RoomManager } from "../rooms/RoomManager";
-import { registerSocketHandlers } from "./handlers";
+import type { RoomManager } from '../rooms/RoomManager';
+import { registerSocketHandlers } from './handlers';
 
-export function attachWebSocketServer(
-  app: FastifyInstance,
-  roomManager: RoomManager,
-): WebSocketServer {
+export function attachWebSocketServer(app: FastifyInstance, roomManager: RoomManager): WebSocketServer {
   const server = app.server;
 
   const wss = new WebSocketServer({
     server,
-    path: "/ws",
+    path: '/ws',
   });
 
-  wss.on("connection", (socket: WebSocket) => {
+  wss.on('connection', (socket: WebSocket) => {
     registerSocketHandlers(socket, roomManager);
   });
 

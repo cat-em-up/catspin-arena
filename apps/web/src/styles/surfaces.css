@@ -1,11 +1,7 @@
 .card,
 .connection-pill {
   border: 1px solid var(--color-border);
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.04),
-    rgba(255, 255, 255, 0.02)
-  );
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.02));
   box-shadow: var(--shadow-sm);
   backdrop-filter: blur(12px);
 }
@@ -47,25 +43,25 @@
   box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.04);
 }
 
-.status-dot[data-state="connected"] {
+.status-dot[data-state='connected'] {
   background: var(--color-success);
 }
 
-.status-dot[data-state="disconnected"] {
+.status-dot[data-state='disconnected'] {
   background: var(--color-danger);
 }
 
-.connection-pill[data-status="connected"] {
+.connection-pill[data-status='connected'] {
   color: var(--color-success);
   background: var(--color-success-soft);
 }
 
-.connection-pill[data-status="connecting"] {
+.connection-pill[data-status='connecting'] {
   color: var(--color-warning);
   background: var(--color-warning-soft);
 }
 
-.connection-pill[data-status="disconnected"] {
+.connection-pill[data-status='disconnected'] {
   color: var(--color-danger);
   background: var(--color-danger-soft);
 }

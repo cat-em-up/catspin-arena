@@ -1,10 +1,10 @@
-const PLAYER_NAME_KEY = "catspin.playerName";
+const PLAYER_NAME_KEY = 'catspin.playerName';
 
 export function getStoredPlayerName(): string {
   const value = window.localStorage.getItem(PLAYER_NAME_KEY);
 
   if (value === null) {
-    return "";
+    return '';
   }
 
   return value;

@@ -3,6 +3,7 @@ export type PlayerDTO = {
   readonly name: string;
   readonly balance: number;
   readonly currentBet: number;
+  readonly lastBet: number | null;
   readonly isReady: boolean;
   readonly isConnected: boolean;
   readonly isEliminated: boolean;

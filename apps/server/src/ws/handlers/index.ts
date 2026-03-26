@@ -1,15 +1,10 @@
-import type { WebSocket } from "ws";
+import type { WebSocket } from 'ws';
 
-import {
-  clientEventSchema,
-  serverEventSchema,
-  type ClientEvent,
-  type ServerEvent,
-} from "@catspin/protocol";
+import { clientEventSchema, serverEventSchema, type ClientEvent, type ServerEvent } from '@catspin/protocol';
 
-import type { Room } from "../../rooms/Room";
-import type { RoomManager } from "../../rooms/RoomManager";
-import { toRoomDto, toGameStateDto } from "../../mappers/toRoomDto";
+import type { Room } from '../../rooms/Room';
+import type { RoomManager } from '../../rooms/RoomManager';
+import { toRoomDto, toGameStateDto } from '../../mappers/toRoomDto';
 
 type ConnectionContext = {
   socket: WebSocket;
@@ -32,7 +27,7 @@ function subscribeToRoom(context: ConnectionContext, room: Room): void {
 
   context.unsubscribe = room.subscribe((snapshot) => {
     send(context.socket, {
-      type: "room_state",
+      type: 'room_state',
       room: {
         id: snapshot.id,
         game: toGameStateDto({
@@ -58,16 +53,13 @@ function cleanupConnection(context: ConnectionContext): void {
   context.currentPlayerId = null;
 }
 
-function handleJoin(
-  context: ConnectionContext,
-  event: Extract<ClientEvent, { type: "join_room" }>,
-): void {
+function handleJoin(context: ConnectionContext, event: Extract<ClientEvent, { type: 'join_room' }>): void {
   const room = context.roomManager.getRoom(event.roomId);
 
   if (room === null) {
     send(context.socket, {
-      type: "error",
-      message: "Room not found",
+      type: 'error',
+      message: 'Room not found',
     });
     return;
   }
@@ -75,10 +67,10 @@ function handleJoin(
   const publicState = room.getPublicState();
   const isExistingPlayer = room.hasPlayer(event.playerId);
 
-  if (publicState.status !== "lobby" && isExistingPlayer === false) {
+  if (publicState.status !== 'lobby' && isExistingPlayer === false) {
     send(context.socket, {
-      type: "error",
-      message: "Game already started",
+      type: 'error',
+      message: 'Game already started',
     });
     return;
   }
@@ -95,7 +87,7 @@ function handleJoin(
   subscribeToRoom(context, room);
 
   send(context.socket, {
-    type: "joined_room",
+    type: 'joined_room',
     room: toRoomDto({
       id: room.id,
       game: room.getPublicState(),
@@ -125,22 +117,19 @@ function handleLeave(context: ConnectionContext): void {
   context.currentPlayerId = null;
 
   send(context.socket, {
-    type: "left_room",
+    type: 'left_room',
   });
 }
 
-function handleReady(
-  context: ConnectionContext,
-  event: Extract<ClientEvent, { type: "set_ready" }>,
-): void {
+function handleReady(context: ConnectionContext, event: Extract<ClientEvent, { type: 'set_ready' }>): void {
   if (context.currentRoom === null || context.currentPlayerId === null) {
     return;
   }
 
   if (event.playerId !== context.currentPlayerId) {
     send(context.socket, {
-      type: "error",
-      message: "Player mismatch",
+      type: 'error',
+      message: 'Player mismatch',
     });
     return;
   }
@@ -148,18 +137,15 @@ function handleReady(
   context.currentRoom.setReady(event.playerId, event.value);
 }
 
-function handleBet(
-  context: ConnectionContext,
-  event: Extract<ClientEvent, { type: "set_bet" }>,
-): void {
+function handleBet(context: ConnectionContext, event: Extract<ClientEvent, { type: 'set_bet' }>): void {
   if (context.currentRoom === null || context.currentPlayerId === null) {
     return;
   }
 
   if (event.playerId !== context.currentPlayerId) {
     send(context.socket, {
-      type: "error",
-      message: "Player mismatch",
+      type: 'error',
+      message: 'Player mismatch',
     });
     return;
   }
@@ -167,18 +153,15 @@ function handleBet(
   context.currentRoom.setBet(event.playerId, event.amount);
 }
 
-function handleStart(
-  context: ConnectionContext,
-  event: Extract<ClientEvent, { type: "start_game" }>,
-): void {
+function handleStart(context: ConnectionContext, event: Extract<ClientEvent, { type: 'start_game' }>): void {
   if (context.currentRoom === null || context.currentPlayerId === null) {
     return;
   }
 
   if (event.playerId !== context.currentPlayerId) {
     send(context.socket, {
-      type: "error",
-      message: "Player mismatch",
+      type: 'error',
+      message: 'Player mismatch',
     });
     return;
   }
@@ -186,10 +169,7 @@ function handleStart(
   context.currentRoom.startGame(event.playerId, Date.now());
 }
 
-export function registerSocketHandlers(
-  socket: WebSocket,
-  roomManager: RoomManager,
-): void {
+export function registerSocketHandlers(socket: WebSocket, roomManager: RoomManager): void {
   const context: ConnectionContext = {
     socket,
     roomManager,
@@ -198,16 +178,16 @@ export function registerSocketHandlers(
     unsubscribe: null,
   };
 
-  socket.on("message", (raw) => {
+  socket.on('message', (raw) => {
     try {
-      const text = typeof raw === "string" ? raw : raw.toString("utf8");
+      const text = typeof raw === 'string' ? raw : raw.toString('utf8');
       const json = JSON.parse(text);
       const parsed = clientEventSchema.safeParse(json);
 
       if (parsed.success === false) {
         send(socket, {
-          type: "error",
-          message: "Invalid client event",
+          type: 'error',
+          message: 'Invalid client event',
         });
         return;
       }
@@ -215,46 +195,46 @@ export function registerSocketHandlers(
       const event = parsed.data;
 
       switch (event.type) {
-        case "join_room":
+        case 'join_room':
           handleJoin(context, event);
           break;
 
-        case "leave_room":
+        case 'leave_room':
           handleLeave(context);
           break;
 
-        case "set_ready":
+        case 'set_ready':
           handleReady(context, event);
           break;
 
-        case "set_bet":
+        case 'set_bet':
           handleBet(context, event);
           break;
 
-        case "start_game":
+        case 'start_game':
           handleStart(context, event);
           break;
 
         default:
           send(socket, {
-            type: "error",
-            message: "Unsupported event",
+            type: 'error',
+            message: 'Unsupported event',
           });
           break;
       }
     } catch {
       send(socket, {
-        type: "error",
-        message: "Malformed message",
+        type: 'error',
+        message: 'Malformed message',
       });
     }
   });
 
-  socket.on("close", () => {
+  socket.on('close', () => {
     cleanupConnection(context);
   });
 
-  socket.on("error", () => {
+  socket.on('error', () => {
     cleanupConnection(context);
   });
 }

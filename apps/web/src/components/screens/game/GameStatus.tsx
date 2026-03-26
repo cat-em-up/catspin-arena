@@ -1,5 +1,5 @@
-import type { PlayerView } from "../../../types/playerView";
-import type { WinningLineDTO } from "@catspin/protocol";
+import type { PlayerView } from '../../../types/playerView';
+import type { WinningLineDTO } from '@catspin/protocol';
 
 type GameStatusProps = {
   readonly isBetting: boolean;
@@ -13,10 +13,10 @@ function getFooterText(params: GameStatusProps): string {
 
   if (isBetting) {
     if (waitingPlayers.length > 0) {
-      return `Waiting for bets from: ${waitingPlayers.map((player) => player.name).join(", ")}`;
+      return `Waiting for bets from: ${waitingPlayers.map((player) => player.name).join(', ')}`;
     }
 
-    return "All bets are placed. Waiting for spin...";
+    return 'All bets are placed. Waiting for spin...';
   }
 
   if (isSpinning) {

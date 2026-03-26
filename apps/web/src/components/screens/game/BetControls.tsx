@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef } from 'react';
 
 type BetControlsProps = {
   readonly value?: number;
@@ -19,15 +19,7 @@ function clamp(value: number, min: number, max: number): number {
 }
 
 export function BetControls(props: BetControlsProps) {
-  const {
-    value,
-    min = 10,
-    max,
-    step = 10,
-    disabled,
-    onChange,
-    onSubmit,
-  } = props;
+  const { value, min = 1, max, step = 1, disabled, onChange, onSubmit } = props;
 
   const stackRef = useRef<HTMLDivElement | null>(null);
 
@@ -71,9 +63,7 @@ export function BetControls(props: BetControlsProps) {
     onChange(getValueFromPointer(clientX, clientY));
   };
 
-  const handlePointerDown = (
-    event: React.PointerEvent<HTMLDivElement>,
-  ): void => {
+  const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>): void => {
     if (disabled) {
       return;
     }
@@ -82,9 +72,7 @@ export function BetControls(props: BetControlsProps) {
     updateFromPointer(event.clientX, event.clientY);
   };
 
-  const handlePointerMove = (
-    event: React.PointerEvent<HTMLDivElement>,
-  ): void => {
+  const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>): void => {
     if (disabled || event.buttons === 0) {
       return;
     }
@@ -106,12 +94,7 @@ export function BetControls(props: BetControlsProps) {
     const itemValue = min + index * safeStep;
     const active = itemValue <= safeValue;
 
-    return (
-      <div
-        key={itemValue}
-        className={active ? "bet-step is-active" : "bet-step"}
-      />
-    );
+    return <div key={itemValue} className={active ? 'bet-step is-active' : 'bet-step'} />;
   });
 
   return (

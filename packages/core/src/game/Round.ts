@@ -1,4 +1,5 @@
-import type { SymbolId } from "./Rules";
+import type { PlayerId } from './Player';
+import type { RoundStatus, SymbolId } from './Rules';
 
 export type SpinGrid = readonly (readonly SymbolId[])[];
 
@@ -17,22 +18,26 @@ export type SpinResult = {
 
 export type RoundState = {
   readonly index: number;
-  readonly status: "idle" | "betting" | "spinning" | "resolved";
+  readonly status: RoundStatus;
   readonly startedAt: number | null;
   readonly bettingClosesAt: number | null;
   readonly spinAt: number | null;
   readonly seed: number;
   readonly result: SpinResult | null;
+  readonly winnerPlayerIds: readonly PlayerId[];
+  readonly payoutAmount: number;
 };
 
 export function createRound(seed: number): RoundState {
   return {
     index: 0,
-    status: "idle",
+    status: 'idle',
     startedAt: null,
     bettingClosesAt: null,
     spinAt: null,
     seed,
     result: null,
+    winnerPlayerIds: [],
+    payoutAmount: 0,
   };
 }

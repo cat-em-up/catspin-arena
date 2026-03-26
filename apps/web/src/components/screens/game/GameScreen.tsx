@@ -1,11 +1,11 @@
-import type { RoomDTO } from "@catspin/protocol";
-import { Section } from "../../layout/Section";
-import type { PlayerView } from "../../../types/playerView";
-import { SlotMachine } from "./SlotMachine";
-import { PlayerItem } from "./PlayerItem";
-import { BetControls } from "./BetControls";
-import { GameStatus } from "./GameStatus";
-import { RoundTimer } from "./RoundTimer";
+import type { RoomDTO } from '@catspin/protocol';
+import { Section } from '../../layout/Section';
+import type { PlayerView } from '../../../types/playerView';
+import { SlotMachine } from './SlotMachine';
+import { PlayerItem } from './PlayerItem';
+import { BetControls } from './BetControls';
+import { GameStatus } from './GameStatus';
+import { RoundTimer } from './RoundTimer';
 
 type GameScreenProps = {
   readonly room: RoomDTO;
@@ -19,6 +19,8 @@ type GameScreenProps = {
 };
 
 function getPlayersWaitingForBet(room: RoomDTO): readonly PlayerView[] {
+  const minBet = room.game.config.minBet;
+
   return room.game.players.filter((player) => {
     if (player.isEliminated) {
       return false;
@@ -28,36 +30,36 @@ function getPlayersWaitingForBet(room: RoomDTO): readonly PlayerView[] {
       return false;
     }
 
-    return player.currentBet <= 0;
+    return player.currentBet < minBet;
   });
 }
 
 export function GameScreen(props: GameScreenProps) {
-  const {
-    room,
-    playerId,
-    currentPlayer,
-    betInput,
-    onBetInputChange,
-    onSetBet,
-    onLeaveRoom,
-  } = props;
+  const { room, playerId, currentPlayer, betInput, onBetInputChange, onSetBet, onLeaveRoom, serverTimeOffsetMs } =
+    props;
 
   const round = room.game.round;
   const result = round.result;
 
-  const isBetting = round.status === "betting";
-  const isSpinning = round.status === "spinning";
+  const isBetting = round.status === 'betting';
+  const isSpinning = round.status === 'spinning';
 
   const waitingPlayers = getPlayersWaitingForBet(room);
 
   const displayGrid = result?.grid ?? [];
   const winningLines = result?.winningLines ?? [];
 
-  const minBet =
-    currentPlayer && currentPlayer.balance < 10 ? currentPlayer.balance : 10;
-  const maxBet =
-    currentPlayer && currentPlayer.balance < 100 ? currentPlayer.balance : 100;
+  const roomMinBet = room.game.config.minBet;
+  const roomMaxBet = room.game.config.maxBet;
+  const balance = currentPlayer?.balance ?? 0;
+
+  const effectiveMaxBet = Math.min(roomMaxBet, balance);
+  const canPlaceBet =
+    currentPlayer !== null &&
+    currentPlayer.isEliminated === false &&
+    currentPlayer.isConnected === true &&
+    isBetting &&
+    effectiveMaxBet >= roomMinBet;
 
   return (
     <Section
@@ -65,10 +67,7 @@ export function GameScreen(props: GameScreenProps) {
       className="game-screen"
       actions={
         <>
-          <RoundTimer
-            room={room}
-            serverTimeOffsetMs={props.serverTimeOffsetMs}
-          />
+          <RoundTimer room={room} serverTimeOffsetMs={serverTimeOffsetMs} />
           <button type="button" onClick={onLeaveRoom}>
             Leave room
           </button>
@@ -77,20 +76,16 @@ export function GameScreen(props: GameScreenProps) {
     >
       <div className="game-layout">
         <div className="game-board">
-          <SlotMachine
-            grid={displayGrid}
-            isSpinning={isSpinning}
-            winningLines={winningLines}
-          />
+          <SlotMachine grid={displayGrid} isSpinning={isSpinning} winningLines={winningLines} />
 
           <BetControls
             value={betInput}
-            disabled={!isBetting}
+            disabled={!canPlaceBet}
             onChange={onBetInputChange}
             onSubmit={onSetBet}
-            min={minBet}
-            max={maxBet}
-            step={minBet}
+            min={roomMinBet}
+            max={canPlaceBet ? effectiveMaxBet : roomMinBet}
+            step={roomMinBet}
           />
         </div>
 

@@ -27,10 +27,10 @@ export function setRoomIdHash(roomId: string): void {
   }
 
   const nextUrl = `${buildUrlWithoutHash()}#${encodeURIComponent(trimmedRoomId)}`;
-  window.history.replaceState(null, "", nextUrl);
+  window.history.replaceState(null, '', nextUrl);
 }
 
 export function clearRoomIdHash(): void {
   const nextUrl = buildUrlWithoutHash();
-  window.history.replaceState(null, "", nextUrl);
+  window.history.replaceState(null, '', nextUrl);
 }

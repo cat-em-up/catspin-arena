@@ -1,4 +1,4 @@
-import { SocketStatus } from "../../network/socket";
+import { SocketStatus } from '../../network/socket';
 
 type HeaderProps = {
   readonly connectionStatus: SocketStatus;
@@ -6,13 +6,9 @@ type HeaderProps = {
   readonly onChangeName: () => void;
 };
 
-export function Header({
-  connectionStatus,
-  playerName,
-  onChangeName,
-}: HeaderProps) {
+export function Header({ connectionStatus, playerName, onChangeName }: HeaderProps) {
   const hasPlayerName = playerName.trim().length > 0;
-  const displayName = hasPlayerName ? playerName : "Guest";
+  const displayName = hasPlayerName ? playerName : 'Guest';
 
   return (
     <header className="app-header">

@@ -1,4 +1,4 @@
-import { Section } from "../layout/Section";
+import { Section } from '../layout/Section';
 
 type RoomSetupScreenProps = {
   readonly roomInput: string;
@@ -10,14 +10,7 @@ type RoomSetupScreenProps = {
 };
 
 export function RoomSetupScreen(props: RoomSetupScreenProps) {
-  const {
-    roomInput,
-    onRoomInputChange,
-    onCreateRoom,
-    onJoinRoom,
-    canCreate,
-    canJoin,
-  } = props;
+  const { roomInput, onRoomInputChange, onCreateRoom, onJoinRoom, canCreate, canJoin } = props;
 
   return (
     <Section title="Create or join room" className="room-setup">
@@ -33,7 +26,7 @@ export function RoomSetupScreen(props: RoomSetupScreenProps) {
           onChange={(event) => onRoomInputChange(event.target.value)}
           placeholder="Room ID"
           onKeyDown={(event) => {
-            if (event.key === "Enter" && canJoin) {
+            if (event.key === 'Enter' && canJoin) {
               onJoinRoom();
             }
           }}

@@ -1,5 +1,5 @@
-import type { ClientEvent, RoomDTO, ServerEvent } from "@catspin/protocol";
-import { createSocket, type SocketClient, type SocketStatus } from "./socket";
+import type { ClientEvent, RoomDTO, ServerEvent } from '@catspin/protocol';
+import { createSocket, type SocketClient, type SocketStatus } from './socket';
 
 export type RealtimeClientOptions = {
   wsUrl: string;
@@ -20,12 +20,10 @@ export type RealtimeClient = {
   startGame: () => void;
 };
 
-const SESSION_ID_KEY = "catspin.sessionId";
-const PLAYER_ID_KEY = "catspin.playerId";
+const SESSION_ID_KEY = 'catspin.sessionId';
+const PLAYER_ID_KEY = 'catspin.playerId';
 
-export function createRealtimeClient(
-  options: RealtimeClientOptions,
-): RealtimeClient {
+export function createRealtimeClient(options: RealtimeClientOptions): RealtimeClient {
   const socket: SocketClient = createSocket(options.wsUrl);
 
   let sessionId = getOrCreateSessionId();
@@ -33,11 +31,11 @@ export function createRealtimeClient(
 
   socket.subscribe((event: ServerEvent) => {
     switch (event.type) {
-      case "room_state":
+      case 'room_state':
         options.onRoomState(event.room);
         break;
 
-      case "joined_room":
+      case 'joined_room':
         playerId = event.playerId;
         savePlayerId(playerId);
 
@@ -47,11 +45,11 @@ export function createRealtimeClient(
         });
         break;
 
-      case "left_room":
+      case 'left_room':
         options.onLeftRoom();
         break;
 
-      case "error":
+      case 'error':
         options.onError(event.message);
         break;
 
@@ -79,7 +77,7 @@ export function createRealtimeClient(
       }
 
       send({
-        type: "join_room",
+        type: 'join_room',
         roomId: normalizedRoomId,
         name: normalizedName,
         playerId,
@@ -88,12 +86,12 @@ export function createRealtimeClient(
     },
 
     leaveRoom: () => {
-      send({ type: "leave_room" });
+      send({ type: 'leave_room' });
     },
 
     setReady: (ready: boolean) => {
       send({
-        type: "set_ready",
+        type: 'set_ready',
         playerId,
         value: ready,
       });
@@ -101,7 +99,7 @@ export function createRealtimeClient(
 
     setBet: (amount: number) => {
       send({
-        type: "set_bet",
+        type: 'set_bet',
         playerId,
         amount,
       });
@@ -109,7 +107,7 @@ export function createRealtimeClient(
 
     startGame: () => {
       send({
-        type: "start_game",
+        type: 'start_game',
         playerId,
       });
     },
@@ -123,7 +121,7 @@ function getOrCreateSessionId(): string {
     return existing;
   }
 
-  const created = createId("session");
+  const created = createId('session');
   window.sessionStorage.setItem(SESSION_ID_KEY, created);
   return created;
 }
@@ -135,7 +133,7 @@ function getOrCreatePlayerId(): string {
     return existing;
   }
 
-  const created = createId("player");
+  const created = createId('player');
   savePlayerId(created);
   return created;
 }
@@ -147,23 +145,15 @@ function savePlayerId(value: string): void {
 function createId(prefix: string): string {
   const browserCrypto = globalThis.crypto;
 
-  if (
-    typeof browserCrypto !== "undefined" &&
-    typeof browserCrypto.randomUUID === "function"
-  ) {
+  if (typeof browserCrypto !== 'undefined' && typeof browserCrypto.randomUUID === 'function') {
     return `${prefix}-${browserCrypto.randomUUID()}`;
   }
 
-  if (
-    typeof browserCrypto !== "undefined" &&
-    typeof browserCrypto.getRandomValues === "function"
-  ) {
+  if (typeof browserCrypto !== 'undefined' && typeof browserCrypto.getRandomValues === 'function') {
     const bytes = new Uint8Array(16);
     browserCrypto.getRandomValues(bytes);
 
-    const hex = Array.from(bytes, (byte) =>
-      byte.toString(16).padStart(2, "0"),
-    ).join("");
+    const hex = Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('');
 
     return `${prefix}-${hex}`;
   }

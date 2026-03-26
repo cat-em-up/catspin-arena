@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { Section } from "../layout/Section";
+import { useEffect, useState } from 'react';
+import { Section } from '../layout/Section';
 
 type NameScreenProps = {
   readonly initialValue: string;
@@ -42,17 +42,13 @@ export function NameScreen(props: NameScreenProps) {
           placeholder="Type your name..."
           maxLength={24}
           onKeyDown={(event) => {
-            if (event.key === "Enter") {
+            if (event.key === 'Enter') {
               handleSubmit();
             }
           }}
         />
 
-        <button
-          type="button"
-          onClick={handleSubmit}
-          disabled={trimmedName.length === 0}
-        >
+        <button type="button" onClick={handleSubmit} disabled={trimmedName.length === 0}>
           Continue
         </button>
       </div>

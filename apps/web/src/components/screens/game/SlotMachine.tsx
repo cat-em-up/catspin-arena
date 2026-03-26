@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import type { SymbolIdDTO, WinningLineDTO } from "@catspin/protocol";
-import { SLOT_SYMBOL_IDS, SLOT_SYMBOL_VIEW } from "./slotSymbols";
+import { useEffect, useMemo, useRef, useState } from 'react';
+import type { SymbolIdDTO, WinningLineDTO } from '@catspin/protocol';
+import { SLOT_SYMBOL_IDS, SLOT_SYMBOL_VIEW } from './slotSymbols';
 
 type SlotMachineProps = {
   readonly grid: readonly (readonly SymbolIdDTO[])[];
@@ -17,9 +17,7 @@ function createRandomGrid(rows: number, cols: number): SymbolIdDTO[][] {
   );
 }
 
-function transposeGrid(
-  grid: readonly (readonly SymbolIdDTO[])[],
-): SymbolIdDTO[][] {
+function transposeGrid(grid: readonly (readonly SymbolIdDTO[])[]): SymbolIdDTO[][] {
   const cols = grid.length;
   const rows = grid[0]?.length ?? 0;
 
@@ -42,9 +40,7 @@ function isRectangularGrid(grid: readonly (readonly SymbolIdDTO[])[]): boolean {
   return grid.every((row) => row.length === innerLength);
 }
 
-function normalizeGrid(
-  grid: readonly (readonly SymbolIdDTO[])[],
-): SymbolIdDTO[][] | null {
+function normalizeGrid(grid: readonly (readonly SymbolIdDTO[])[]): SymbolIdDTO[][] | null {
   if (!isRectangularGrid(grid)) {
     return null;
   }
@@ -63,9 +59,7 @@ function normalizeGrid(
   return null;
 }
 
-function getWinningCellSet(
-  winningLines: readonly WinningLineDTO[],
-): ReadonlySet<string> {
+function getWinningCellSet(winningLines: readonly WinningLineDTO[]): ReadonlySet<string> {
   const cells = new Set<string>();
 
   winningLines.forEach((line) => {
@@ -96,9 +90,7 @@ export function SlotMachine(props: SlotMachineProps) {
     lastValidGridRef.current = normalizedGrid;
   }
 
-  const [displayGrid, setDisplayGrid] = useState<SymbolIdDTO[][]>(
-    lastValidGridRef.current,
-  );
+  const [displayGrid, setDisplayGrid] = useState<SymbolIdDTO[][]>(lastValidGridRef.current);
 
   useEffect(() => {
     if (!isSpinning) {
@@ -138,15 +130,10 @@ export function SlotMachine(props: SlotMachineProps) {
             }}
           >
             {row.map((symbol, colIndex) => {
-              const isWinningCell =
-                !isSpinning && winningCells.has(`${rowIndex}:${colIndex}`);
+              const isWinningCell = !isSpinning && winningCells.has(`${rowIndex}:${colIndex}`);
 
               return (
-                <div
-                  key={`${rowIndex}-${colIndex}`}
-                  className="slot-cell"
-                  data-win={isWinningCell}
-                >
+                <div key={`${rowIndex}-${colIndex}`} className="slot-cell" data-win={isWinningCell}>
                   {SLOT_SYMBOL_VIEW[symbol]}
                 </div>
               );

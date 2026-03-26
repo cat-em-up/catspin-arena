@@ -1,10 +1,7 @@
-import type { PublicGameState } from "@catspin/core";
-import type { GameStateDTO, RoomDTO } from "@catspin/protocol";
+import type { PublicGameState } from '@catspin/core';
+import type { GameStateDTO, RoomDTO } from '@catspin/protocol';
 
-export function toGameStateDto(args: {
-  game: PublicGameState;
-  serverNow: number;
-}): GameStateDTO {
+export function toGameStateDto(args: { game: PublicGameState; serverNow: number }): GameStateDTO {
   const { game, serverNow } = args;
 
   return {
@@ -17,6 +14,7 @@ export function toGameStateDto(args: {
       name: player.name,
       balance: player.balance,
       currentBet: player.currentBet,
+      lastBet: player.lastBet,
       isReady: player.isReady,
       isConnected: player.isConnected,
       isEliminated: player.isEliminated,
@@ -41,17 +39,20 @@ export function toGameStateDto(args: {
                 multiplier: line.multiplier,
               })),
             },
+      winnerPlayerIds: [...game.round.winnerPlayerIds],
+      payoutAmount: game.round.payoutAmount,
     },
-    bettingDurationMs: game.bettingDurationMs,
+    config: {
+      minBet: game.config.minBet,
+      maxBet: game.config.maxBet,
+      bettingDurationMs: game.config.bettingDurationMs,
+      spinDurationMs: game.config.spinDurationMs,
+    },
     serverNow,
   };
 }
 
-export function toRoomDto(args: {
-  id: string;
-  game: PublicGameState;
-  serverNow: number;
-}): RoomDTO {
+export function toRoomDto(args: { id: string; game: PublicGameState; serverNow: number }): RoomDTO {
   return {
     id: args.id,
     game: toGameStateDto({

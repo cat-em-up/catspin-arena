@@ -63,13 +63,11 @@ Examples:
 
 ```ts
 export type ClientEvent =
-  | { type: "join_room"; name: string }
-  | { type: "place_bet"; amount: number }
-  | { type: "ready" };
+  | { type: 'join_room'; name: string }
+  | { type: 'place_bet'; amount: number }
+  | { type: 'ready' };
 
-export type ServerEvent =
-  | { type: "state_update"; state: RoomState }
-  | { type: "spin_result"; result: SpinResult };
+export type ServerEvent = { type: 'state_update'; state: RoomState } | { type: 'spin_result'; result: SpinResult };
 ```
 
 ---

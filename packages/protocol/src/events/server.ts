@@ -1,28 +1,28 @@
-import { z } from "zod";
+import { z } from 'zod';
 
-import { roomSchema } from "../schemas";
+import { roomSchema } from '../schemas';
 
 export const roomStateEventSchema = z.object({
-  type: z.literal("room_state"),
+  type: z.literal('room_state'),
   room: roomSchema,
 });
 
 export const joinedRoomEventSchema = z.object({
-  type: z.literal("joined_room"),
+  type: z.literal('joined_room'),
   room: roomSchema,
   playerId: z.string().min(1),
 });
 
 export const leftRoomEventSchema = z.object({
-  type: z.literal("left_room"),
+  type: z.literal('left_room'),
 });
 
 export const errorEventSchema = z.object({
-  type: z.literal("error"),
+  type: z.literal('error'),
   message: z.string().min(1),
 });
 
-export const serverEventSchema = z.discriminatedUnion("type", [
+export const serverEventSchema = z.discriminatedUnion('type', [
   roomStateEventSchema,
   joinedRoomEventSchema,
   leftRoomEventSchema,

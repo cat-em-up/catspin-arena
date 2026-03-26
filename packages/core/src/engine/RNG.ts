@@ -20,7 +20,7 @@ export class RNG {
 
   public nextInt(maxExclusive: number): number {
     if (!Number.isInteger(maxExclusive) || maxExclusive <= 0) {
-      throw new Error("maxExclusive must be a positive integer");
+      throw new Error('maxExclusive must be a positive integer');
     }
 
     return Math.floor(this.nextFloat() * maxExclusive);

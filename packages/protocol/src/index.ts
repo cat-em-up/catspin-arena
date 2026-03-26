@@ -5,7 +5,7 @@ export {
   setBetEventSchema,
   setReadyEventSchema,
   startGameEventSchema,
-} from "./events/client";
+} from './events/client';
 
 export {
   errorEventSchema,
@@ -13,7 +13,7 @@ export {
   leftRoomEventSchema,
   roomStateEventSchema,
   serverEventSchema,
-} from "./events/server";
+} from './events/server';
 
 export {
   gameStateSchema,
@@ -26,7 +26,7 @@ export {
   spinResultSchema,
   symbolIdSchema,
   winningLineSchema,
-} from "./schemas";
+} from './schemas';
 
 export type {
   ClientEvent,
@@ -35,15 +35,9 @@ export type {
   SetBetEvent,
   SetReadyEvent,
   StartGameEvent,
-} from "./events/client";
+} from './events/client';
 
-export type {
-  ErrorEvent,
-  JoinedRoomEvent,
-  LeftRoomEvent,
-  RoomStateEvent,
-  ServerEvent,
-} from "./events/server";
+export type { ErrorEvent, JoinedRoomEvent, LeftRoomEvent, RoomStateEvent, ServerEvent } from './events/server';
 
 export type {
   GameStateDTO,
@@ -53,6 +47,6 @@ export type {
   SpinResultDTO,
   SymbolIdDTO,
   WinningLineDTO,
-} from "./types/GameStateDTO";
-export type { PlayerDTO } from "./types/PlayerDTO";
-export type { RoomDTO } from "./types/RoomDTO";
+} from './types/GameStateDTO';
+export type { PlayerDTO } from './types/PlayerDTO';
+export type { RoomDTO } from './types/RoomDTO';

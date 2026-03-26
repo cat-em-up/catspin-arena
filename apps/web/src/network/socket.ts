@@ -1,6 +1,6 @@
-import type { ClientEvent, ServerEvent } from "@catspin/protocol";
+import type { ClientEvent, ServerEvent } from '@catspin/protocol';
 
-export type SocketStatus = "idle" | "connecting" | "connected" | "disconnected";
+export type SocketStatus = 'idle' | 'connecting' | 'connected' | 'disconnected';
 
 export type SocketClient = {
   connect: () => void;
@@ -13,7 +13,7 @@ export type SocketClient = {
 
 export function createSocket(url: string): SocketClient {
   let socket: WebSocket | null = null;
-  let status: SocketStatus = "idle";
+  let status: SocketStatus = 'idle';
 
   const eventListeners = new Set<(event: ServerEvent) => void>();
   const statusListeners = new Set<(status: SocketStatus) => void>();
@@ -24,55 +24,51 @@ export function createSocket(url: string): SocketClient {
   };
 
   const connect = (): void => {
-    if (
-      socket !== null &&
-      (socket.readyState === WebSocket.OPEN ||
-        socket.readyState === WebSocket.CONNECTING)
-    ) {
+    if (socket !== null && (socket.readyState === WebSocket.OPEN || socket.readyState === WebSocket.CONNECTING)) {
       return;
     }
 
-    setStatus("connecting");
+    setStatus('connecting');
 
     socket = new WebSocket(url);
 
-    socket.addEventListener("open", () => {
-      setStatus("connected");
+    socket.addEventListener('open', () => {
+      setStatus('connected');
     });
 
-    socket.addEventListener("close", () => {
-      setStatus("disconnected");
+    socket.addEventListener('close', () => {
+      setStatus('disconnected');
       socket = null;
     });
 
-    socket.addEventListener("error", () => {
-      setStatus("disconnected");
+    socket.addEventListener('error', () => {
+      setStatus('disconnected');
     });
 
-    socket.addEventListener("message", (message) => {
+    socket.addEventListener('message', (message) => {
       try {
         const raw = JSON.parse(String(message.data)) as ServerEvent;
         eventListeners.forEach((listener) => listener(raw));
       } catch (error) {
-        console.error("Failed to parse server event", error);
+        console.error('Failed to parse server event', error);
       }
     });
   };
 
   const disconnect = (): void => {
     if (socket === null) {
-      setStatus("disconnected");
+      setStatus('disconnected');
       return;
     }
 
     socket.close();
     socket = null;
-    setStatus("disconnected");
+    setStatus('disconnected');
   };
 
   const send = (event: ClientEvent): void => {
     if (socket === null || socket.readyState !== WebSocket.OPEN) {
-      console.warn("Socket is not connected");
+      console.warn('Socket is not connected');
       return;
     }
 
@@ -87,9 +83,7 @@ export function createSocket(url: string): SocketClient {
     };
   };
 
-  const onStatusChange = (
-    listener: (status: SocketStatus) => void,
-  ): (() => void) => {
+  const onStatusChange = (listener: (status: SocketStatus) => void): (() => void) => {
     statusListeners.add(listener);
 
     return () => {

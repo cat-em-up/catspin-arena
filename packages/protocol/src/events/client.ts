@@ -1,7 +1,7 @@
-import { z } from "zod";
+import { z } from 'zod';
 
 export const joinRoomEventSchema = z.object({
-  type: z.literal("join_room"),
+  type: z.literal('join_room'),
   roomId: z.string().min(1),
   sessionId: z.string().min(1),
   playerId: z.string().min(1),
@@ -9,27 +9,27 @@ export const joinRoomEventSchema = z.object({
 });
 
 export const leaveRoomEventSchema = z.object({
-  type: z.literal("leave_room"),
+  type: z.literal('leave_room'),
 });
 
 export const setReadyEventSchema = z.object({
-  type: z.literal("set_ready"),
+  type: z.literal('set_ready'),
   playerId: z.string().min(1),
   value: z.boolean(),
 });
 
 export const setBetEventSchema = z.object({
-  type: z.literal("set_bet"),
+  type: z.literal('set_bet'),
   playerId: z.string().min(1),
   amount: z.number().finite(),
 });
 
 export const startGameEventSchema = z.object({
-  type: z.literal("start_game"),
+  type: z.literal('start_game'),
   playerId: z.string().min(1),
 });
 
-export const clientEventSchema = z.discriminatedUnion("type", [
+export const clientEventSchema = z.discriminatedUnion('type', [
   joinRoomEventSchema,
   leaveRoomEventSchema,
   setReadyEventSchema,

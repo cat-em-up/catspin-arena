@@ -3,8 +3,8 @@ export type CreateRoomResponse = {
 };
 
 export async function createRoom(): Promise<CreateRoomResponse> {
-  const response = await fetch("/rooms", {
-    method: "POST",
+  const response = await fetch('/rooms', {
+    method: 'POST',
   });
 
   if (!response.ok) {

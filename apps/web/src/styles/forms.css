@@ -1,6 +1,6 @@
 button,
-input[type="text"],
-input[type="number"],
+input[type='text'],
+input[type='number'],
 input:not([type]),
 select,
 textarea {
@@ -42,8 +42,8 @@ button:disabled {
   box-shadow: none;
 }
 
-input[type="text"],
-input[type="number"],
+input[type='text'],
+input[type='number'],
 input:not([type]),
 textarea,
 select {
@@ -68,13 +68,13 @@ select:disabled {
   cursor: not-allowed;
 }
 
-input[type="range"] {
+input[type='range'] {
   width: 100%;
   accent-color: var(--color-brand);
   cursor: pointer;
 }
 
-input[type="range"]:disabled {
+input[type='range']:disabled {
   cursor: not-allowed;
   opacity: 0.5;
 }

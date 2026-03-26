@@ -1,29 +1,29 @@
-import { createPlayer, type PlayerId, type PlayerState } from "../game/Player";
-import type { GameState } from "../game/GameState";
-import type { RoundState } from "../game/Round";
+import { createPlayer, type PlayerId, type PlayerState } from '../game/Player';
+import type { GameState } from '../game/GameState';
+import type { RoundState } from '../game/Round';
 
 export type GameCommand =
   | {
-      readonly type: "add_player";
+      readonly type: 'add_player';
       readonly playerId: PlayerId;
       readonly name: string;
     }
   | {
-      readonly type: "remove_player";
+      readonly type: 'remove_player';
       readonly playerId: PlayerId;
     }
   | {
-      readonly type: "set_ready";
+      readonly type: 'set_ready';
       readonly playerId: PlayerId;
       readonly value: boolean;
     }
   | {
-      readonly type: "set_bet";
+      readonly type: 'set_bet';
       readonly playerId: PlayerId;
       readonly amount: number;
     }
   | {
-      readonly type: "start_game";
+      readonly type: 'start_game';
       readonly playerId: PlayerId;
       readonly now: number;
     };
@@ -33,19 +33,15 @@ function replacePlayer(
   playerId: PlayerId,
   update: (player: PlayerState) => PlayerState,
 ): readonly PlayerState[] {
-  return players.map((player) =>
-    player.id === playerId ? update(player) : player,
-  );
+  return players.map((player) => (player.id === playerId ? update(player) : player));
 }
 
 function canStartGame(state: GameState): boolean {
-  if (state.status !== "lobby") {
+  if (state.status !== 'lobby') {
     return false;
   }
 
-  const connectedPlayers = state.players.filter(
-    (player) => player.isConnected === true,
-  );
+  const connectedPlayers = state.players.filter((player) => player.isConnected === true);
 
   if (connectedPlayers.length === 0) {
     return false;
@@ -57,53 +53,41 @@ function canStartGame(state: GameState): boolean {
 function createBettingRound(state: GameState, now: number): RoundState {
   return {
     index: state.round.index + 1,
-    status: "betting",
+    status: 'betting',
     startedAt: now,
     bettingClosesAt: now + state.config.bettingDurationMs,
     spinAt: null,
     seed: state.rngState,
     result: null,
+    winnerPlayerIds: [],
+    payoutAmount: 0,
   };
 }
 
-function sanitizeBet(
-  state: GameState,
-  amount: number,
-  balance: number,
-): number {
+function sanitizeBet(state: GameState, amount: number, balance: number): number | null {
   if (Number.isFinite(amount) === false) {
-    return 0;
+    return null;
   }
 
   const normalizedAmount = Math.floor(amount);
-
-  if (normalizedAmount < state.config.minBet) {
-    return 0;
-  }
-
   const cappedByConfig = Math.min(normalizedAmount, state.config.maxBet);
   const cappedByBalance = Math.min(cappedByConfig, balance);
 
   if (cappedByBalance < state.config.minBet) {
-    return 0;
+    return null;
   }
 
   return cappedByBalance;
 }
 
-export function applyCommand(
-  state: GameState,
-  command: GameCommand,
-): GameState {
+export function applyCommand(state: GameState, command: GameCommand): GameState {
   switch (command.type) {
-    case "add_player": {
-      if (state.status !== "lobby") {
+    case 'add_player': {
+      if (state.status !== 'lobby') {
         return state;
       }
 
-      const alreadyExists = state.players.some(
-        (player) => player.id === command.playerId,
-      );
+      const alreadyExists = state.players.some((player) => player.id === command.playerId);
 
       if (alreadyExists === true) {
         return state;
@@ -122,22 +106,17 @@ export function applyCommand(
       };
     }
 
-    case "remove_player": {
-      const nextPlayers = state.players.filter(
-        (player) => player.id !== command.playerId,
-      );
+    case 'remove_player': {
+      const nextPlayers = state.players.filter((player) => player.id !== command.playerId);
 
       if (nextPlayers.length === state.players.length) {
         return state;
       }
 
       const nextHostPlayerId =
-        state.hostPlayerId === command.playerId
-          ? (nextPlayers[0]?.id ?? null)
-          : state.hostPlayerId;
+        state.hostPlayerId === command.playerId ? (nextPlayers[0]?.id ?? null) : state.hostPlayerId;
 
-      const nextWinnerPlayerId =
-        state.winnerPlayerId === command.playerId ? null : state.winnerPlayerId;
+      const nextWinnerPlayerId = state.winnerPlayerId === command.playerId ? null : state.winnerPlayerId;
 
       return {
         ...state,
@@ -147,14 +126,12 @@ export function applyCommand(
       };
     }
 
-    case "set_ready": {
-      if (state.status !== "lobby") {
+    case 'set_ready': {
+      if (state.status !== 'lobby') {
         return state;
       }
 
-      const hasPlayer = state.players.some(
-        (player) => player.id === command.playerId,
-      );
+      const hasPlayer = state.players.some((player) => player.id === command.playerId);
 
       if (hasPlayer === false) {
         return state;
@@ -169,10 +146,8 @@ export function applyCommand(
       };
     }
 
-    case "set_bet": {
-      const canEditBet =
-        state.status === "lobby" ||
-        (state.status === "running" && state.round.status === "betting");
+    case 'set_bet': {
+      const canEditBet = state.status === 'lobby' || (state.status === 'running' && state.round.status === 'betting');
 
       if (canEditBet === false) {
         return state;
@@ -180,22 +155,27 @@ export function applyCommand(
 
       const player = state.players.find((item) => item.id === command.playerId);
 
-      if (player === undefined || player.isEliminated === true) {
+      if (player === undefined || player.isEliminated === true || player.isConnected === false) {
         return state;
       }
 
       const nextBet = sanitizeBet(state, command.amount, player.balance);
+
+      if (nextBet === null) {
+        return state;
+      }
 
       return {
         ...state,
         players: replacePlayer(state.players, command.playerId, (item) => ({
           ...item,
           currentBet: nextBet,
+          lastBet: nextBet,
         })),
       };
     }
 
-    case "start_game": {
+    case 'start_game': {
       if (state.hostPlayerId !== command.playerId) {
         return state;
       }
@@ -212,13 +192,12 @@ export function applyCommand(
       }));
 
       const startedPlayerCount = nextPlayers.filter(
-        (player) =>
-          player.isConnected === true && player.isEliminated === false,
+        (player) => player.isConnected === true && player.isEliminated === false,
       ).length;
 
       return {
         ...state,
-        status: "running",
+        status: 'running',
         players: nextPlayers,
         startedPlayerCount,
         round: createBettingRound(

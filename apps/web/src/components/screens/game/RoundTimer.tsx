@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import type { RoomDTO } from "@catspin/protocol";
+import { useEffect, useState } from 'react';
+import type { RoomDTO } from '@catspin/protocol';
 
 type Props = {
   readonly room: RoomDTO;
@@ -19,7 +19,7 @@ export function RoundTimer({ room, serverTimeOffsetMs }: Props) {
 
   const round = room.game.round;
 
-  if (round.status !== "betting" || round.bettingClosesAt === null) {
+  if (round.status !== 'betting' || round.bettingClosesAt === null) {
     return null;
   }
 
@@ -34,7 +34,7 @@ export function RoundTimer({ room, serverTimeOffsetMs }: Props) {
 
   return (
     <span
-      className={`round-timer ${isUrgent ? "is-urgent" : ""}`}
+      className={`round-timer ${isUrgent ? 'is-urgent' : ''}`}
       aria-label={`Time left: ${seconds} seconds`}
       title={`Time left: ${seconds} seconds`}
     >

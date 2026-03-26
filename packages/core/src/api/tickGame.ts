@@ -1,27 +1,25 @@
-import { PayoutCalculator } from "../engine/Payout";
-import { RNG } from "../engine/RNG";
-import { SlotEngine } from "../engine/SlotEngine";
-import type { GameState } from "../game/GameState";
-import type { PlayerState } from "../game/Player";
-import type { RoundState, SpinResult } from "../game/Round";
+import { PayoutCalculator } from '../engine/Payout';
+import { RNG } from '../engine/RNG';
+import { SlotEngine } from '../engine/SlotEngine';
+import type { GameState } from '../game/GameState';
+import type { PlayerState } from '../game/Player';
+import type { RoundState, SpinResult } from '../game/Round';
 
 function createBettingRound(state: GameState, now: number): RoundState {
   return {
     index: state.round.index + 1,
-    status: "betting",
+    status: 'betting',
     startedAt: now,
     bettingClosesAt: now + state.config.bettingDurationMs,
     spinAt: null,
     seed: state.rngState,
     result: null,
+    winnerPlayerIds: [],
+    payoutAmount: 0,
   };
 }
 
-function sanitizeRoundBet(
-  minBet: number,
-  maxBet: number,
-  player: PlayerState,
-): number {
+function sanitizeRoundBet(minBet: number, maxBet: number, player: PlayerState): number {
   const normalizedBet = Math.floor(player.currentBet);
 
   if (normalizedBet < minBet) {
@@ -37,6 +35,20 @@ function sanitizeRoundBet(
   return cappedBet;
 }
 
+function resolveAutoBet(state: GameState, player: PlayerState): number {
+  const policy = state.config.roundRules.missedBetPolicy;
+
+  if (policy === 'repeat-last' && player.lastBet !== null) {
+    const repeatedBet = Math.min(player.lastBet, state.config.maxBet, player.balance);
+
+    return repeatedBet >= state.config.minBet ? repeatedBet : 0;
+  }
+
+  const minBet = Math.min(state.config.minBet, state.config.maxBet, player.balance);
+
+  return minBet >= state.config.minBet ? minBet : 0;
+}
+
 function buildSpinResult(state: GameState): {
   readonly result: SpinResult;
   readonly nextRngState: number;
@@ -45,12 +57,12 @@ function buildSpinResult(state: GameState): {
 
   const slotEngine = new SlotEngine({
     rows: state.config.rows,
-    reelStrips: state.config.reelStrips,
+    math: state.config.math,
   });
 
   const payoutCalculator = new PayoutCalculator({
-    paylines: state.config.paylines,
-    paytable: state.config.paytable,
+    paylines: state.config.math.paylines,
+    paytable: state.config.math.paytable,
   });
 
   const grid = slotEngine.spin(rng);
@@ -66,11 +78,39 @@ function buildSpinResult(state: GameState): {
   };
 }
 
-function resolveBalances(
+function resolveRoundOutcome(
   state: GameState,
   result: SpinResult,
-): readonly PlayerState[] {
-  return state.players.map((player) => {
+): {
+  readonly players: readonly PlayerState[];
+  readonly winnerPlayerIds: readonly string[];
+  readonly payoutAmount: number;
+} {
+  const sanitizedPlayers = state.players.map((player) => ({
+    player,
+    bet: player.isEliminated === true ? 0 : sanitizeRoundBet(state.config.minBet, state.config.maxBet, player),
+  }));
+
+  const highestBet = sanitizedPlayers.reduce((max, entry) => Math.max(max, entry.bet), 0);
+
+  const winnerPlayerIds =
+    highestBet > 0
+      ? sanitizedPlayers
+          .filter((entry) => entry.bet === highestBet)
+          .map((entry) => entry.player.id)
+          .sort((left, right) => left.localeCompare(right))
+      : [];
+
+  const payoutAmount =
+    state.config.roundRules.payoutBasePolicy === 'highest-bet' ? highestBet * result.totalMultiplier : 0;
+
+  const winnersCount = winnerPlayerIds.length;
+
+  const baseShare = winnersCount > 0 && payoutAmount > 0 ? Math.floor(payoutAmount / winnersCount) : 0;
+
+  const remainder = winnersCount > 0 && payoutAmount > 0 ? payoutAmount % winnersCount : 0;
+
+  const nextPlayers = state.players.map((player) => {
     if (player.isEliminated === true) {
       return {
         ...player,
@@ -79,22 +119,12 @@ function resolveBalances(
       };
     }
 
-    const bet = sanitizeRoundBet(
-      state.config.minBet,
-      state.config.maxBet,
-      player,
-    );
+    const bet = sanitizedPlayers.find((entry) => entry.player.id === player.id)?.bet ?? 0;
 
-    if (bet === 0) {
-      return {
-        ...player,
-        currentBet: 0,
-        lastWin: 0,
-        isEliminated: player.balance < state.config.minBet,
-      };
-    }
+    const winnerIndex = winnerPlayerIds.indexOf(player.id);
+    const extraChip = winnerIndex >= 0 && winnerIndex < remainder ? 1 : 0;
 
-    const winAmount = bet * result.totalMultiplier;
+    const winAmount = winnerIndex >= 0 ? baseShare + extraChip : 0;
     const nextBalance = player.balance - bet + winAmount;
 
     return {
@@ -105,22 +135,21 @@ function resolveBalances(
       isEliminated: nextBalance < state.config.minBet,
     };
   });
+
+  return {
+    players: nextPlayers,
+    winnerPlayerIds,
+    payoutAmount,
+  };
 }
 
-function getAlivePlayers(
-  players: readonly PlayerState[],
-): readonly PlayerState[] {
+function getAlivePlayers(players: readonly PlayerState[]): readonly PlayerState[] {
   return players.filter((player) => player.isEliminated === false);
 }
 
-function getWinnerPlayerId(
-  state: GameState,
-  players: readonly PlayerState[],
-): string | null {
+function getWinnerPlayerId(state: GameState, players: readonly PlayerState[]): string | null {
   const targetWinner = players.find(
-    (player) =>
-      player.isEliminated === false &&
-      player.balance >= state.config.targetBalance,
+    (player) => player.isEliminated === false && player.balance >= state.config.targetBalance,
   );
 
   if (targetWinner !== undefined) {
@@ -136,10 +165,7 @@ function getWinnerPlayerId(
   return null;
 }
 
-function shouldFinishGame(
-  state: GameState,
-  players: readonly PlayerState[],
-): boolean {
+function shouldFinishGame(state: GameState, players: readonly PlayerState[]): boolean {
   if (players.some((player) => player.balance >= state.config.targetBalance)) {
     return true;
   }
@@ -162,10 +188,21 @@ function normalizeBetsForSpin(state: GameState): readonly PlayerState[] {
       };
     }
 
+    const sanitizedBet = sanitizeRoundBet(state.config.minBet, state.config.maxBet, player);
+
+    if (sanitizedBet > 0) {
+      return {
+        ...player,
+        currentBet: sanitizedBet,
+      };
+    }
+
+    const autoBet = resolveAutoBet(state, player);
+
     return {
       ...player,
-      currentBet:
-        sanitizeRoundBet(state.config.minBet, state.config.maxBet, player) || 0,
+      currentBet: autoBet,
+      lastBet: autoBet > 0 ? autoBet : player.lastBet,
     };
   });
 }
@@ -180,50 +217,44 @@ function preparePlayersForNextRound(state: GameState): readonly PlayerState[] {
       };
     }
 
+    const canAffordMinBet = player.balance >= state.config.minBet;
+
     return {
       ...player,
       currentBet: 0,
       lastWin: 0,
+      isEliminated: canAffordMinBet ? false : true,
     };
   });
 }
 
 function haveAllActivePlayersPlacedBets(state: GameState): boolean {
-  const activePlayers = state.players.filter(
-    (player) => player.isConnected === true && player.isEliminated === false,
-  );
+  const activePlayers = state.players.filter((player) => player.isConnected === true && player.isEliminated === false);
 
   if (activePlayers.length === 0) {
     return false;
   }
 
   return activePlayers.every((player) => {
-    const bet = sanitizeRoundBet(
-      state.config.minBet,
-      state.config.maxBet,
-      player,
-    );
+    const bet = sanitizeRoundBet(state.config.minBet, state.config.maxBet, player);
 
     return bet > 0;
   });
 }
 
 export function tickGame(state: GameState, now: number): GameState {
-  if (state.status !== "running") {
+  if (state.status !== 'running') {
     return state;
   }
 
   switch (state.round.status) {
-    case "idle": {
+    case 'idle': {
       return state;
     }
 
-    case "betting": {
+    case 'betting': {
       const bettingClosesAt = state.round.bettingClosesAt;
-      const shouldSpinNow =
-        haveAllActivePlayersPlacedBets(state) ||
-        bettingClosesAt === null ||
-        now >= bettingClosesAt;
+      const shouldSpinNow = haveAllActivePlayersPlacedBets(state) || bettingClosesAt === null || now >= bettingClosesAt;
 
       if (shouldSpinNow === false) {
         return state;
@@ -234,15 +265,17 @@ export function tickGame(state: GameState, now: number): GameState {
         players: normalizeBetsForSpin(state),
         round: {
           ...state.round,
-          status: "spinning",
+          status: 'spinning',
           spinAt: now,
           result: null,
           seed: state.rngState,
+          winnerPlayerIds: [],
+          payoutAmount: 0,
         },
       };
     }
 
-    case "spinning": {
+    case 'spinning': {
       const spinAt = state.round.spinAt;
 
       if (spinAt === null || now < spinAt + state.config.spinDurationMs) {
@@ -250,33 +283,35 @@ export function tickGame(state: GameState, now: number): GameState {
       }
 
       const { result, nextRngState } = buildSpinResult(state);
-      const nextPlayers = resolveBalances(state, result);
-      const finished = shouldFinishGame(state, nextPlayers);
-      const winnerPlayerId = finished
-        ? getWinnerPlayerId(state, nextPlayers)
-        : null;
+      const outcome = resolveRoundOutcome(state, result);
+      const finished = shouldFinishGame(state, outcome.players);
+      const winnerPlayerId = finished ? getWinnerPlayerId(state, outcome.players) : null;
 
       return {
         ...state,
-        status: finished ? "finished" : "running",
-        players: nextPlayers,
+        status: finished ? 'finished' : 'running',
+        players: outcome.players,
         rngState: nextRngState,
         winnerPlayerId,
         round: {
           ...state.round,
-          status: "resolved",
+          status: 'resolved',
           result,
+          winnerPlayerIds: outcome.winnerPlayerIds,
+          payoutAmount: outcome.payoutAmount,
         },
       };
     }
 
-    case "resolved": {
-      const alivePlayers = getAlivePlayers(state.players);
+    case 'resolved': {
+      const nextPlayers = preparePlayersForNextRound(state);
+      const alivePlayers = getAlivePlayers(nextPlayers);
 
       if (state.startedPlayerCount > 1 && alivePlayers.length <= 1) {
         return {
           ...state,
-          status: "finished",
+          status: 'finished',
+          players: nextPlayers,
           winnerPlayerId: alivePlayers[0]?.id ?? null,
         };
       }
@@ -284,12 +319,11 @@ export function tickGame(state: GameState, now: number): GameState {
       if (state.startedPlayerCount <= 1 && alivePlayers.length === 0) {
         return {
           ...state,
-          status: "finished",
+          status: 'finished',
+          players: nextPlayers,
           winnerPlayerId: null,
         };
       }
-
-      const nextPlayers = preparePlayersForNextRound(state);
 
       return {
         ...state,

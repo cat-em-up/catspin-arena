@@ -1,4 +1,4 @@
-const SVG_NS = "http://www.w3.org/2000/svg";
+const SVG_NS = 'http://www.w3.org/2000/svg';
 
 export function startAnimatedPawFavicon(): () => void {
   const link = getOrCreateFaviconLink();
@@ -23,13 +23,11 @@ export function startAnimatedPawFavicon(): () => void {
 }
 
 function getOrCreateFaviconLink(): HTMLLinkElement {
-  let link = document.querySelector(
-    "link[rel='icon']",
-  ) as HTMLLinkElement | null;
+  let link = document.querySelector("link[rel='icon']") as HTMLLinkElement | null;
 
   if (link === null) {
-    link = document.createElement("link");
-    link.rel = "icon";
+    link = document.createElement('link');
+    link.rel = 'icon';
     document.head.appendChild(link);
   }
 

@@ -1,11 +1,19 @@
-import type { GameState } from "../game/GameState";
-import type { RoundStatus, GameStatus, SymbolId } from "../game/Rules";
+import type { GameState } from '../game/GameState';
+import type { GameStatus, RoundStatus, SymbolId } from '../game/Rules';
+
+export type PublicGameConfig = {
+  readonly minBet: number;
+  readonly maxBet: number;
+  readonly bettingDurationMs: number;
+  readonly spinDurationMs: number;
+};
 
 export type PublicPlayerState = {
   readonly id: string;
   readonly name: string;
   readonly balance: number;
   readonly currentBet: number;
+  readonly lastBet: number | null;
   readonly isReady: boolean;
   readonly isConnected: boolean;
   readonly isEliminated: boolean;
@@ -32,6 +40,8 @@ export type PublicRoundState = {
   readonly bettingClosesAt: number | null;
   readonly spinAt: number | null;
   readonly result: PublicSpinResult | null;
+  readonly winnerPlayerIds: readonly string[];
+  readonly payoutAmount: number;
 };
 
 export type PublicGameState = {
@@ -41,7 +51,7 @@ export type PublicGameState = {
   readonly winnerPlayerId: string | null;
   readonly players: readonly PublicPlayerState[];
   readonly round: PublicRoundState;
-  readonly bettingDurationMs: number;
+  readonly config: PublicGameConfig;
 };
 
 export function getPublicState(state: GameState): PublicGameState {
@@ -55,6 +65,7 @@ export function getPublicState(state: GameState): PublicGameState {
       name: player.name,
       balance: player.balance,
       currentBet: player.currentBet,
+      lastBet: player.lastBet,
       isReady: player.isReady,
       isConnected: player.isConnected,
       isEliminated: player.isEliminated,
@@ -79,7 +90,14 @@ export function getPublicState(state: GameState): PublicGameState {
                 multiplier: line.multiplier,
               })),
             },
+      winnerPlayerIds: [...state.round.winnerPlayerIds],
+      payoutAmount: state.round.payoutAmount,
     },
-    bettingDurationMs: state.config.bettingDurationMs,
+    config: {
+      minBet: state.config.minBet,
+      maxBet: state.config.maxBet,
+      bettingDurationMs: state.config.bettingDurationMs,
+      spinDurationMs: state.config.spinDurationMs,
+    },
   };
 }

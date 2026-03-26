@@ -1,5 +1,5 @@
-import type { Payline, Paytable } from "../game/Rules";
-import type { SpinGrid, WinningLine } from "../game/Round";
+import type { Payline, Paytable } from '../game/Rules';
+import type { SpinGrid, WinningLine } from '../game/Round';
 
 export type PayoutResult = {
   readonly totalMultiplier: number;
@@ -10,10 +10,7 @@ export class PayoutCalculator {
   private readonly paylines: readonly Payline[];
   private readonly paytable: Paytable;
 
-  public constructor(args: {
-    paylines: readonly Payline[];
-    paytable: Paytable;
-  }) {
+  public constructor(args: { paylines: readonly Payline[]; paytable: Paytable }) {
     this.paylines = args.paylines;
     this.paytable = args.paytable;
   }

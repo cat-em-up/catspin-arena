@@ -1,8 +1,8 @@
-import type { RoomDTO } from "@catspin/protocol";
-import { createRoom as createRoomRequest } from "../api/rooms";
-import { createRealtimeClient, type RealtimeClient } from "../network/client";
-import type { SocketStatus } from "../network/socket";
-import { getStoredPlayerName, savePlayerName } from "../utils/playerName";
+import type { RoomDTO } from '@catspin/protocol';
+import { createRoom as createRoomRequest } from '../api/rooms';
+import { createRealtimeClient, type RealtimeClient } from '../network/client';
+import type { SocketStatus } from '../network/socket';
+import { getStoredPlayerName, savePlayerName } from '../utils/playerName';
 
 export type FooterState = {
   primaryText: string;
@@ -41,15 +41,13 @@ export type CreateClientStoreOptions = {
 };
 
 const EMPTY_FOOTER: FooterState = {
-  primaryText: "",
+  primaryText: '',
   secondaryText: undefined,
 };
 
-export function createClientStore(
-  options: CreateClientStoreOptions,
-): ClientStore {
+export function createClientStore(options: CreateClientStoreOptions): ClientStore {
   let state: ClientStoreState = {
-    connectionStatus: "idle",
+    connectionStatus: 'idle',
     roomId: null,
     playerId: null,
     playerName: getStoredPlayerName(),

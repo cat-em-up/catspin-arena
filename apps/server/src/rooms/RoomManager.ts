@@ -1,6 +1,6 @@
-import { randomId } from "@catspin/shared";
+import { randomId } from '@catspin/shared';
 
-import { Room } from "./Room";
+import { Room } from './Room';
 
 export class RoomManager {
   private readonly roomsById: Map<string, Room>;

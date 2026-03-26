@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { ReactNode } from 'react';
 
 type SectionProps = {
   readonly title: string;
@@ -8,15 +8,13 @@ type SectionProps = {
 };
 
 export function Section({ title, children, actions, className }: SectionProps) {
-  const classes = ["section", className].filter(Boolean).join(" ");
+  const classes = ['section', className].filter(Boolean).join(' ');
 
   return (
     <section className={classes}>
       <div className="section-header">
         <h2>{title}</h2>
-        {actions ? (
-          <div className="section-actions inline wrap">{actions}</div>
-        ) : null}
+        {actions ? <div className="section-actions inline wrap">{actions}</div> : null}
       </div>
 
       {children}

@@ -6,9 +6,9 @@ import {
   type GameCommand,
   type GameState,
   type PublicGameState,
-} from "@catspin/core";
+} from '@catspin/core';
 
-import { PlayerSession, type PlayerSessionSnapshot } from "./PlayerSession";
+import { PlayerSession, type PlayerSessionSnapshot } from './PlayerSession';
 
 export type RoomSnapshot = {
   readonly id: string;
@@ -68,9 +68,7 @@ export class Room {
     return {
       id: this.id,
       game: this.getPublicState(),
-      sessions: Array.from(this.sessionsByPlayerId.values()).map((session) =>
-        session.getSnapshot(),
-      ),
+      sessions: Array.from(this.sessionsByPlayerId.values()).map((session) => session.getSnapshot()),
     };
   }
 
@@ -82,11 +80,7 @@ export class Room {
     return this.state.players.some((player) => player.id === playerId);
   }
 
-  public joinPlayer(args: {
-    sessionId: string;
-    playerId: string;
-    name: string;
-  }): RoomSnapshot {
+  public joinPlayer(args: { sessionId: string; playerId: string; name: string }): RoomSnapshot {
     const existingSession = this.sessionsByPlayerId.get(args.playerId);
 
     if (existingSession !== undefined) {
@@ -105,7 +99,7 @@ export class Room {
     this.sessionsByPlayerId.set(args.playerId, session);
 
     this.dispatch({
-      type: "add_player",
+      type: 'add_player',
       playerId: args.playerId,
       name: args.name,
     });
@@ -121,7 +115,7 @@ export class Room {
     this.sessionsByPlayerId.delete(playerId);
 
     this.dispatch({
-      type: "remove_player",
+      type: 'remove_player',
       playerId,
     });
 
@@ -143,7 +137,7 @@ export class Room {
 
   public setReady(playerId: string, value: boolean): RoomSnapshot {
     this.dispatch({
-      type: "set_ready",
+      type: 'set_ready',
       playerId,
       value,
     });
@@ -153,7 +147,7 @@ export class Room {
 
   public setBet(playerId: string, amount: number): RoomSnapshot {
     this.dispatch({
-      type: "set_bet",
+      type: 'set_bet',
       playerId,
       amount,
     });
@@ -163,7 +157,7 @@ export class Room {
 
   public startGame(playerId: string, now: number): RoomSnapshot {
     this.dispatch({
-      type: "start_game",
+      type: 'start_game',
       playerId,
       now,
     });

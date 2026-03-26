@@ -14,12 +14,7 @@ export class PlayerSession {
 
   private connected: boolean;
 
-  public constructor(args: {
-    sessionId: string;
-    playerId: string;
-    roomId: string;
-    name: string;
-  }) {
+  public constructor(args: { sessionId: string; playerId: string; roomId: string; name: string }) {
     this.sessionId = args.sessionId;
     this.playerId = args.playerId;
     this.roomId = args.roomId;
