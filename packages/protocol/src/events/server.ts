@@ -1,37 +1,23 @@
-import { z } from 'zod';
+import type { RoomDTO } from '../types/RoomDTO';
 
-import { roomSchema } from '../schemas';
+export type RoomStateEvent = {
+  type: 'room_state';
+  room: RoomDTO;
+};
 
-export const roomStateEventSchema = z.object({
-  type: z.literal('room_state'),
-  room: roomSchema,
-});
+export type JoinedRoomEvent = {
+  type: 'joined_room';
+  room: RoomDTO;
+  playerId: string;
+};
 
-export const joinedRoomEventSchema = z.object({
-  type: z.literal('joined_room'),
-  room: roomSchema,
-  playerId: z.string().min(1),
-});
+export type LeftRoomEvent = {
+  type: 'left_room';
+};
 
-export const leftRoomEventSchema = z.object({
-  type: z.literal('left_room'),
-});
+export type ErrorEvent = {
+  type: 'error';
+  message: string;
+};
 
-export const errorEventSchema = z.object({
-  type: z.literal('error'),
-  message: z.string().min(1),
-});
-
-export const serverEventSchema = z.discriminatedUnion('type', [
-  roomStateEventSchema,
-  joinedRoomEventSchema,
-  leftRoomEventSchema,
-  errorEventSchema,
-]);
-
-export type RoomStateEvent = z.infer<typeof roomStateEventSchema>;
-export type JoinedRoomEvent = z.infer<typeof joinedRoomEventSchema>;
-export type LeftRoomEvent = z.infer<typeof leftRoomEventSchema>;
-export type ErrorEvent = z.infer<typeof errorEventSchema>;
-
-export type ServerEvent = z.infer<typeof serverEventSchema>;
+export type ServerEvent = RoomStateEvent | JoinedRoomEvent | LeftRoomEvent | ErrorEvent;

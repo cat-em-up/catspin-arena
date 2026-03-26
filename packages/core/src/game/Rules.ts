@@ -29,6 +29,7 @@ export type GameSettings = {
   readonly targetBalance: number;
   readonly bettingDurationMs: number;
   readonly spinDurationMs: number;
+  readonly resolvedDurationMs: number;
   readonly rows: number;
   readonly reels: number;
 };

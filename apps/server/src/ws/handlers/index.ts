@@ -1,6 +1,6 @@
 import type { WebSocket } from 'ws';
 
-import { clientEventSchema, serverEventSchema, type ClientEvent, type ServerEvent } from '@catspin/protocol';
+import type { ClientEvent, ServerEvent } from '@catspin/protocol';
 
 import type { Room } from '../../rooms/Room';
 import type { RoomManager } from '../../rooms/RoomManager';
@@ -15,8 +15,7 @@ type ConnectionContext = {
 };
 
 function send(socket: WebSocket, event: ServerEvent): void {
-  const validated = serverEventSchema.parse(event);
-  socket.send(JSON.stringify(validated));
+  socket.send(JSON.stringify(event));
 }
 
 function subscribeToRoom(context: ConnectionContext, room: Room): void {
@@ -26,7 +25,7 @@ function subscribeToRoom(context: ConnectionContext, room: Room): void {
   }
 
   context.unsubscribe = room.subscribe((snapshot) => {
-    send(context.socket, {
+    const event: ServerEvent = {
       type: 'room_state',
       room: {
         id: snapshot.id,
@@ -35,7 +34,9 @@ function subscribeToRoom(context: ConnectionContext, room: Room): void {
           serverNow: Date.now(),
         }),
       },
-    });
+    };
+
+    send(context.socket, event);
   });
 }
 
@@ -169,6 +170,52 @@ function handleStart(context: ConnectionContext, event: Extract<ClientEvent, { t
   context.currentRoom.startGame(event.playerId, Date.now());
 }
 
+function isClientEvent(value: unknown): value is ClientEvent {
+  if (typeof value !== 'object' || value === null) {
+    return false;
+  }
+
+  const event = value as Record<string, unknown>;
+
+  if (typeof event.type !== 'string') {
+    return false;
+  }
+
+  switch (event.type) {
+    case 'join_room':
+      return (
+        typeof event.roomId === 'string' &&
+        event.roomId.length > 0 &&
+        typeof event.sessionId === 'string' &&
+        event.sessionId.length > 0 &&
+        typeof event.playerId === 'string' &&
+        event.playerId.length > 0 &&
+        typeof event.name === 'string' &&
+        event.name.length > 0
+      );
+
+    case 'leave_room':
+      return true;
+
+    case 'set_ready':
+      return typeof event.playerId === 'string' && event.playerId.length > 0 && typeof event.value === 'boolean';
+
+    case 'set_bet':
+      return (
+        typeof event.playerId === 'string' &&
+        event.playerId.length > 0 &&
+        typeof event.amount === 'number' &&
+        Number.isFinite(event.amount)
+      );
+
+    case 'start_game':
+      return typeof event.playerId === 'string' && event.playerId.length > 0;
+
+    default:
+      return false;
+  }
+}
+
 export function registerSocketHandlers(socket: WebSocket, roomManager: RoomManager): void {
   const context: ConnectionContext = {
     socket,
@@ -181,10 +228,9 @@ export function registerSocketHandlers(socket: WebSocket, roomManager: RoomManag
   socket.on('message', (raw) => {
     try {
       const text = typeof raw === 'string' ? raw : raw.toString('utf8');
-      const json = JSON.parse(text);
-      const parsed = clientEventSchema.safeParse(json);
+      const json: unknown = JSON.parse(text);
 
-      if (parsed.success === false) {
+      if (!isClientEvent(json)) {
         send(socket, {
           type: 'error',
           message: 'Invalid client event',
@@ -192,7 +238,7 @@ export function registerSocketHandlers(socket: WebSocket, roomManager: RoomManag
         return;
       }
 
-      const event = parsed.data;
+      const event = json;
 
       switch (event.type) {
         case 'join_room':

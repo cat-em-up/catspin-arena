@@ -12,6 +12,7 @@ function createBettingRound(state: GameState, now: number): RoundState {
     startedAt: now,
     bettingClosesAt: now + state.config.bettingDurationMs,
     spinAt: null,
+    resolvedAt: 0,
     seed: state.rngState,
     result: null,
     winnerPlayerIds: [],
@@ -296,6 +297,9 @@ export function tickGame(state: GameState, now: number): GameState {
         round: {
           ...state.round,
           status: 'resolved',
+          bettingClosesAt: null,
+          spinAt: null,
+          resolvedAt: now,
           result,
           winnerPlayerIds: outcome.winnerPlayerIds,
           payoutAmount: outcome.payoutAmount,
@@ -304,6 +308,12 @@ export function tickGame(state: GameState, now: number): GameState {
     }
 
     case 'resolved': {
+      const resolvedAt = state.round.resolvedAt;
+
+      if (now < resolvedAt + state.config.resolvedDurationMs) {
+        return state;
+      }
+
       const nextPlayers = preparePlayersForNextRound(state);
       const alivePlayers = getAlivePlayers(nextPlayers);
 

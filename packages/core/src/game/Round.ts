@@ -22,6 +22,7 @@ export type RoundState = {
   readonly startedAt: number | null;
   readonly bettingClosesAt: number | null;
   readonly spinAt: number | null;
+  readonly resolvedAt: number;
   readonly seed: number;
   readonly result: SpinResult | null;
   readonly winnerPlayerIds: readonly PlayerId[];
@@ -35,6 +36,7 @@ export function createRound(seed: number): RoundState {
     startedAt: null,
     bettingClosesAt: null,
     spinAt: null,
+    resolvedAt: 0,
     seed,
     result: null,
     winnerPlayerIds: [],

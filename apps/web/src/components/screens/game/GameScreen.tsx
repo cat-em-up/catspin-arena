@@ -1,6 +1,7 @@
 import type { RoomDTO } from '@catspin/protocol';
-import { Section } from '../../layout/Section';
+import { useClientStoreState } from '../../../state/storeContext';
 import type { PlayerView } from '../../../types/playerView';
+import { Section } from '../../layout/Section';
 import { SlotMachine } from './SlotMachine';
 import { PlayerItem } from './PlayerItem';
 import { BetControls } from './BetControls';
@@ -37,6 +38,8 @@ function getPlayersWaitingForBet(room: RoomDTO): readonly PlayerView[] {
 export function GameScreen(props: GameScreenProps) {
   const { room, playerId, currentPlayer, betInput, onBetInputChange, onSetBet, onLeaveRoom, serverTimeOffsetMs } =
     props;
+
+  const state = useClientStoreState();
 
   const round = room.game.round;
   const result = round.result;
@@ -76,7 +79,12 @@ export function GameScreen(props: GameScreenProps) {
     >
       <div className="game-layout">
         <div className="game-board">
-          <SlotMachine grid={displayGrid} isSpinning={isSpinning} winningLines={winningLines} />
+          <SlotMachine
+            grid={displayGrid}
+            paylines={state.room?.game.config.paylines ?? []}
+            roundStatus={round.status}
+            winningLines={winningLines}
+          />
 
           <BetControls
             value={betInput}

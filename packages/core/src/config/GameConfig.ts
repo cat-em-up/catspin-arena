@@ -16,6 +16,7 @@ export const DEFAULT_GAME_SETTINGS: GameSettings = {
   targetBalance: 200,
   bettingDurationMs: 10_000,
   spinDurationMs: 2_000,
+  resolvedDurationMs: 2_000,
   rows: 3,
   reels: 5,
 };
