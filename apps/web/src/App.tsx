@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { RoomDTO } from '@catspin/protocol';
-import { initAudio, unlockAudio } from './audio';
+import { initAudio, playMusic, unlockAudio } from './audio';
 import { useClientStore, useClientStoreState } from './state/storeContext';
 import { clearRoomIdHash, getRoomIdFromHash, setRoomIdHash } from './utils/roomHash';
 import type { PlayerView } from './types/playerView';
@@ -10,6 +10,7 @@ import { LobbyScreen } from './components/screens/LobbyScreen';
 import { GameScreen } from './components/screens/game/GameScreen';
 import { WinScreen } from './components/screens/WinScreen';
 import { Header } from './components/layout/Header';
+import { AudioToggles } from './components/common/AudioToggles';
 
 import './styles/index.css';
 
@@ -121,6 +122,8 @@ export default function App() {
       unlockAudio();
       window.removeEventListener('pointerdown', unlock);
     };
+
+    setTimeout(() => playMusic(['main_theme', 'main_theme_mix1', 'main_theme_mix2', 'main_theme_mix3']), 6000);
 
     window.addEventListener('pointerdown', unlock, { once: true });
 
@@ -247,6 +250,8 @@ export default function App() {
       </div>
 
       <WinScreen room={state.room} playerId={state.playerId} onLeaveRoom={handleLeaveRoom} />
+
+      <AudioToggles />
     </div>
   );
 }

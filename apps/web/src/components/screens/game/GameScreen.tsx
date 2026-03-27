@@ -8,6 +8,7 @@ import { PlayerItem } from './PlayerItem';
 import { BetControls } from './BetControls';
 import { GameStatus } from './GameStatus';
 import { RoundTimer } from './RoundTimer';
+import { Button } from '../../common/Button';
 
 type GameScreenProps = {
   readonly room: RoomDTO;
@@ -75,9 +76,9 @@ export function GameScreen(props: GameScreenProps) {
       actions={
         <>
           <RoundTimer room={room} serverTimeOffsetMs={serverTimeOffsetMs} />
-          <button type="button" onClick={onLeaveRoom}>
+          <Button type="button" onClick={onLeaveRoom} sound="click">
             Leave room
-          </button>
+          </Button>
         </>
       }
     >

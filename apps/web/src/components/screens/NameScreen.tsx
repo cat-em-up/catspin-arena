@@ -3,6 +3,7 @@ import { playSound } from '../../audio';
 import { useClientStore, useClientStoreState } from '../../state/storeContext';
 import { Section } from '../layout/Section';
 import { Avatar } from '../common/Avatar';
+import { Button } from '../common/Button';
 
 type NameScreenProps = {
   readonly isOpen: boolean;
@@ -35,7 +36,7 @@ export function NameScreen(props: NameScreenProps) {
 
     store.setPlayerInfo(name, avatar);
 
-    playSound('happy_meow');
+    playSound('meow');
 
     setTimeout(() => {
       setIsSubmitting(false);
@@ -71,28 +72,29 @@ export function NameScreen(props: NameScreenProps) {
           const selected = avatar === item;
 
           return (
-            <button
+            <Button
               key={item}
               type="button"
               className={selected ? 'avatar selected' : 'avatar'}
               onClick={() => setAvatar(item)}
               disabled={isSubmitting}
+              sound="click"
             >
               <Avatar size="lg" value={item} mood={selected && isSubmitting ? 'win' : 'neutral'} />
-            </button>
+            </Button>
           );
         })}
       </div>
 
       <div className="actions">
-        <button onClick={handleSubmit} disabled={!canSubmit || isSubmitting}>
+        <Button onClick={handleSubmit} disabled={!canSubmit || isSubmitting} sound="click">
           Continue
-        </button>
+        </Button>
 
         {name.length > 0 && (
-          <button onClick={handleCancel} disabled={isSubmitting}>
+          <Button onClick={handleCancel} disabled={isSubmitting} sound="click">
             Cancel
-          </button>
+          </Button>
         )}
       </div>
     </Section>

@@ -1,6 +1,7 @@
 import { SocketStatus } from '../../network/socket';
 import { useClientStoreState } from '../../state/storeContext';
 import { Avatar } from '../common/Avatar';
+import { Button } from '../common/Button';
 
 type HeaderProps = {
   readonly connectionStatus: SocketStatus;
@@ -15,10 +16,10 @@ export function Header({ connectionStatus, onChangeName }: HeaderProps) {
       <h1 className="title">CatSpin Arena</h1>
 
       <div className="user">
-        <button type="button" onClick={onChangeName}>
+        <Button type="button" onClick={onChangeName} sound="click">
           <Avatar value={state.playerAvatar} />
           {state.playerName || 'Guest'}
-        </button>
+        </Button>
 
         <span className="status" data-status={connectionStatus} />
       </div>

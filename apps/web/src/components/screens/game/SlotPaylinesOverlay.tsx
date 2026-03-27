@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { WinningLineDTO, PaylinePresentationConfigDTO } from '@catspin/protocol';
+import { playSound } from '../../../audio';
 
 type SlotPaylinesOverlayMode = 'hidden' | 'all' | 'winning';
 
@@ -195,6 +196,7 @@ export function SlotPaylinesOverlay(props: SlotPaylinesOverlayProps) {
   const hideDelayMs = presentation.hideDelayMs;
 
   const onSequenceCompleteRef = useRef<(() => void) | undefined>(onSequenceComplete);
+  const startedAnimationKeyRef = useRef<number | null>(null);
 
   useEffect(() => {
     onSequenceCompleteRef.current = onSequenceComplete;
@@ -213,8 +215,15 @@ export function SlotPaylinesOverlay(props: SlotPaylinesOverlayProps) {
       setActiveLineIndex(-1);
       setProgress(0);
       setIsVisible(false);
+      startedAnimationKeyRef.current = null;
       return;
     }
+
+    if (startedAnimationKeyRef.current === animationKey) {
+      return;
+    }
+
+    startedAnimationKeyRef.current = animationKey;
 
     setIsVisible(true);
     setActiveLineIndex(0);
@@ -226,9 +235,15 @@ export function SlotPaylinesOverlay(props: SlotPaylinesOverlayProps) {
     let lineStartTime = 0;
 
     const runLine = (lineIndex: number): void => {
+      if (sequenceCancelled) {
+        return;
+      }
+
       setActiveLineIndex(lineIndex);
       setProgress(0);
       lineStartTime = performance.now();
+
+      playSound('payline');
 
       const tick = (now: number): void => {
         if (sequenceCancelled) {

@@ -6,12 +6,53 @@
   align-items: center;
   justify-content: center;
   padding: 24px;
+  overflow: hidden;
   background: rgba(6, 10, 18, 0.78);
   backdrop-filter: blur(6px);
   animation: win-overlay-fade-in 220ms ease-out;
 }
 
+.coin-rain {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.coin {
+  position: absolute;
+  top: -20%;
+  left: var(--x);
+  width: var(--size);
+  height: var(--size);
+  opacity: var(--opacity);
+  will-change: transform, opacity;
+  animation: coin-fall var(--duration) linear infinite;
+  animation-delay: var(--delay);
+}
+
+.coin::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url('/assets/img/coin.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  filter: drop-shadow(0 0 6px rgba(255, 200, 80, 0.55)) drop-shadow(0 0 14px rgba(255, 200, 80, 0.3));
+  transform-origin: center;
+  will-change: transform, filter;
+  animation:
+    coin-wobble calc(var(--duration) * 0.9) ease-in-out infinite,
+    coin-rotate calc(var(--duration) * 0.55) linear infinite,
+    coin-glow calc(var(--duration) * 0.7) ease-in-out infinite;
+  animation-delay: var(--delay), var(--delay), var(--delay);
+}
+
 .win-card {
+  position: relative;
+  z-index: 1;
   width: min(100%, 420px);
   padding: 28px 24px;
   border: 1px solid var(--color-border);
@@ -110,6 +151,68 @@
   outline-offset: 3px;
 }
 
+@keyframes coin-fall {
+  0% {
+    transform: translate3d(0, -22vh, 0);
+    opacity: 0;
+  }
+
+  8% {
+    opacity: var(--opacity);
+  }
+
+  100% {
+    transform: translate3d(0, 125vh, 0);
+    opacity: var(--opacity);
+  }
+}
+
+@keyframes coin-wobble {
+  0% {
+    transform: translateX(0) scale(0.92);
+  }
+
+  25% {
+    transform: translateX(calc(var(--drift) * 0.35)) scale(1);
+  }
+
+  50% {
+    transform: translateX(calc(var(--drift) * -0.2)) scale(0.96);
+  }
+
+  75% {
+    transform: translateX(calc(var(--drift) * 0.55)) scale(1.03);
+  }
+
+  100% {
+    transform: translateX(0) scale(0.98);
+  }
+}
+
+@keyframes coin-rotate {
+  0% {
+    rotate: 0deg;
+  }
+
+  100% {
+    rotate: var(--rotate);
+  }
+}
+
+@keyframes coin-glow {
+  0% {
+    filter: drop-shadow(0 0 6px rgba(255, 200, 80, 0.55)) drop-shadow(0 0 14px rgba(255, 200, 80, 0.3));
+  }
+
+  50% {
+    filter: drop-shadow(0 0 10px rgba(255, 215, 110, 0.75)) drop-shadow(0 0 22px rgba(255, 215, 110, 0.45));
+  }
+
+  100% {
+    filter: drop-shadow(0 0 6px rgba(255, 200, 80, 0.55)) drop-shadow(0 0 14px rgba(255, 200, 80, 0.3));
+  }
+}
+
 @keyframes win-overlay-fade-in {
   from {
     opacity: 0;
@@ -140,18 +243,6 @@
   .win-card {
     padding: 22px 18px;
     border-radius: 20px;
-  }
-
-  .win-player {
-    padding: 16px 14px;
-  }
-
-  .win-name {
-    font-size: 22px;
-  }
-
-  .win-balance {
-    font-size: 17px;
   }
 
   .win-card button {

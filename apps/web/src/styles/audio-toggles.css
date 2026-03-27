@@ -1,0 +1,59 @@
+.audio-toggles {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 1000;
+  display: flex;
+  gap: 8px;
+}
+
+.audio-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 12px;
+  background: rgba(10, 14, 24, 0.88);
+  backdrop-filter: blur(10px);
+  cursor: pointer;
+  transition:
+    transform 120ms ease,
+    opacity 120ms ease,
+    box-shadow 120ms ease,
+    border-color 120ms ease;
+}
+
+.audio-toggle:hover {
+  transform: translateY(-1px);
+}
+
+.audio-toggle:active {
+  transform: translateY(0);
+}
+
+.audio-toggle:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 2px rgba(255, 255, 255, 0.18),
+    0 0 0 4px rgba(80, 180, 255, 0.28);
+}
+
+.audio-toggle.is-on {
+  border-color: rgba(80, 255, 200, 0.45);
+  box-shadow: 0 0 16px rgba(80, 255, 200, 0.22);
+  opacity: 1;
+}
+
+.audio-toggle.is-off {
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: none;
+  opacity: 0.55;
+}
+
+.audio-toggle__icon {
+  font-size: 18px;
+  line-height: 1;
+}

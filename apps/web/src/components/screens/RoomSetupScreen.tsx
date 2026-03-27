@@ -1,3 +1,4 @@
+import { Button } from '../common/Button';
 import { Section } from '../layout/Section';
 
 type RoomSetupScreenProps = {
@@ -15,9 +16,9 @@ export function RoomSetupScreen(props: RoomSetupScreenProps) {
   return (
     <Section title="Create or join room" className="room-setup">
       <div className="create-row">
-        <button type="button" onClick={onCreateRoom} disabled={!canCreate}>
+        <Button type="button" onClick={onCreateRoom} sound="click" disabled={!canCreate}>
           Create room
-        </button>
+        </Button>
       </div>
 
       <div className="join-row">
@@ -32,9 +33,9 @@ export function RoomSetupScreen(props: RoomSetupScreenProps) {
           }}
         />
 
-        <button type="button" onClick={onJoinRoom} disabled={!canJoin}>
+        <Button type="button" onClick={onJoinRoom} sound="click" disabled={!canJoin}>
           Join room
-        </button>
+        </Button>
       </div>
     </Section>
   );

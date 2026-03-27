@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { SymbolIdDTO, WinningLineDTO, RoundStatusDTO, PaylinePresentationConfigDTO } from '@catspin/protocol';
+import { playSound } from '../../../audio/audio';
 import { SLOT_SYMBOL_IDS, SLOT_SYMBOL_VIEW } from './slotSymbols';
 import { SlotPaylinesOverlay } from './SlotPaylinesOverlay';
 
@@ -13,6 +14,23 @@ type SlotMachineProps = {
 };
 
 type PaylinesOverlayMode = 'hidden' | 'all' | 'winning';
+
+let spinInterval: number | null = null;
+
+function startSpinTicks(): void {
+  stopSpinTicks();
+
+  spinInterval = window.setInterval(() => {
+    playSound('spin');
+  }, 80);
+}
+
+function stopSpinTicks(): void {
+  if (spinInterval !== null) {
+    clearInterval(spinInterval);
+    spinInterval = null;
+  }
+}
 
 function createRandomGrid(rows: number, cols: number): SymbolIdDTO[][] {
   return Array.from({ length: rows }, () =>
@@ -147,6 +165,11 @@ export function SlotMachine(props: SlotMachineProps) {
     if (enteredSpinning) {
       setOverlayMode('hidden');
       setDisplayWinningLines([]);
+      startSpinTicks();
+    }
+
+    if (previousStatus === 'spinning' && roundStatus !== 'spinning') {
+      stopSpinTicks();
     }
 
     if (enteredResolved) {

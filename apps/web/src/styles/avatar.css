@@ -7,8 +7,6 @@
 
   overflow: hidden;
 
-  background: var(--color-surface);
-
   transition:
     transform 0.15s ease,
     background 0.15s ease,

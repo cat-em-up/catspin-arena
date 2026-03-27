@@ -5,7 +5,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>CatSpin Arena</title>
-  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+  <link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg" />
 
   <style>
     #splash {
@@ -34,7 +34,7 @@
       width: 100%;
       height: 100%;
       background: radial-gradient(circle at top, #2b1d52, #09050f);
-      background-image: url(assets/splash-bg.jpg);
+      background-image: url(assets/img/splash-bg.jpg);
       background-size: cover;
       background-position: center;
       background-repeat: no-repeat;
@@ -302,8 +302,8 @@
     </div>
 
     <div class="splash-content">
-      <img class="catemup-logo" src="assets/catemup_logo_square_transparent_softglow.png" alt="CatEmUp logo">
-      <img class="catspin-logo" src="assets/catspin_arena_logo.png" alt="CatSpin Arena logo">
+      <img class="catemup-logo" src="assets/img/catemup_logo_square_transparent_softglow.png" alt="CatEmUp logo">
+      <img class="catspin-logo" src="assets/img/catspin_arena_logo.png" alt="CatSpin Arena logo">
       <div class="subtitle">Bet. Spin. Survive.</div>
       <div class="hint">Click to continue</div>
     </div>
@@ -340,9 +340,9 @@
       }
 
       async function initAudio() {
-        impactBuffer = await loadAudioBuffer(`${SFW_PATH}/impact.mp3`);
+        impactBuffer = await loadAudioBuffer(`${SFW_PATH}/impact.wav`);
 
-        welcomeAudio = new Audio(`${SFW_PATH}/welcome.mp3`);
+        welcomeAudio = new Audio(`${SFW_PATH}/welcome.wav`);
         welcomeAudio.preload = 'auto';
         welcomeAudio.volume = WELCOME_VOLUME;
         welcomeAudio.load();
@@ -414,7 +414,7 @@
       }
 
       initAudio().catch(() => {
-        welcomeAudio = new Audio(`${SFW_PATH}/welcome.mp3`);
+        welcomeAudio = new Audio(`${SFW_PATH}/welcome.wav`);
         welcomeAudio.preload = 'auto';
         welcomeAudio.volume = WELCOME_VOLUME;
         welcomeAudio.load();
