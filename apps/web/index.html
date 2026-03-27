@@ -301,7 +301,8 @@
       }
 
       if (window.location.hash && window.location.hash.length > 1) {
-        removeSplash();
+        splash.remove();
+        document.body.style.overflow = '';
         return;
       }
 
