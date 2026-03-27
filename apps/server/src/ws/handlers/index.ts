@@ -83,6 +83,7 @@ function handleJoin(context: ConnectionContext, event: Extract<ClientEvent, { ty
     sessionId: event.sessionId,
     playerId: event.playerId,
     name: event.name,
+    avatar: event.avatar,
   });
 
   subscribeToRoom(context, room);
@@ -207,7 +208,9 @@ function isClientEvent(value: unknown): value is ClientEvent {
         typeof event.playerId === 'string' &&
         event.playerId.length > 0 &&
         typeof event.name === 'string' &&
-        event.name.length > 0
+        event.name.length > 0 &&
+        typeof event.avatar === 'string' &&
+        event.avatar.length > 0
       );
 
     case 'leave_room':

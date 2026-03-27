@@ -1,6 +1,7 @@
 import type { RoomDTO } from '@catspin/protocol';
 import type { PlayerView } from '../../types/playerView';
 import { Section } from '../layout/Section';
+import { Avatar } from '../common/Avatar';
 
 type LobbyScreenProps = {
   readonly room: RoomDTO;
@@ -16,6 +17,7 @@ type LobbyScreenProps = {
 export function LobbyScreen(props: LobbyScreenProps) {
   const { room, playerId, currentPlayer, players, isHost, onToggleReady, onStartGame, onLeaveRoom } = props;
 
+  console.log(players);
   return (
     <Section
       title={`Room ${room.id}`}
@@ -43,6 +45,7 @@ export function LobbyScreen(props: LobbyScreenProps) {
           <li key={player.id} className="player" data-current={player.id === playerId} data-online={player.isConnected}>
             <div className="player-row">
               <div className="player-left">
+                <Avatar size="sm" value={player.avatar} />
                 <span className="player-name">{player.name}</span>
 
                 {player.id === playerId ? <span className="badge">you</span> : null}

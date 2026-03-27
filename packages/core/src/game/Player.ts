@@ -3,6 +3,7 @@ export type PlayerId = string;
 export type PlayerState = {
   readonly id: PlayerId;
   readonly name: string;
+  readonly avatar: string;
   readonly balance: number;
   readonly currentBet: number;
   readonly lastBet: number | null;
@@ -13,10 +14,11 @@ export type PlayerState = {
   readonly hasConfirmedBet: boolean;
 };
 
-export function createPlayer(args: { id: PlayerId; name: string; startBalance: number }): PlayerState {
+export function createPlayer(args: { id: PlayerId; name: string; avatar: string; startBalance: number }): PlayerState {
   return {
     id: args.id,
     name: args.name,
+    avatar: args.avatar,
     balance: args.startBalance,
     currentBet: 0,
     lastBet: null,

@@ -1,62 +1,82 @@
-import { useEffect, useState } from 'react';
+import { useMemo, useState } from 'react';
+import { useClientStore, useClientStoreState } from '../../state/storeContext';
 import { Section } from '../layout/Section';
+import { Avatar } from '../common/Avatar';
 
 type NameScreenProps = {
-  readonly initialValue: string;
-  readonly onSubmit: (name: string) => void;
-  readonly onCancel: () => void;
+  readonly isOpen: boolean;
+  readonly onClose: () => void;
 };
 
+const AVATARS = ['🐱', '🐈', '🐈‍⬛', '😺', '😸', '😹', '😻', '😼', '😽', '🙀', '😿', '😾'];
+
 export function NameScreen(props: NameScreenProps) {
-  const { initialValue, onSubmit, onCancel } = props;
+  const { isOpen, onClose } = props;
 
-  const [name, setName] = useState<string>(initialValue);
+  const store = useClientStore();
+  const state = useClientStoreState();
 
-  useEffect(() => {
-    setName(initialValue);
-  }, [initialValue]);
+  const [name, setName] = useState(state.playerName);
+  const [avatar, setAvatar] = useState(state.playerAvatar || AVATARS[0]);
 
-  const trimmedName = name.trim();
-  const hasInitialValue = initialValue.trim().length > 0;
+  const canSubmit = useMemo(() => {
+    return name.trim().length > 0;
+  }, [name]);
 
   const handleSubmit = (): void => {
-    if (trimmedName.length === 0) {
-      return;
-    }
+    if (!canSubmit) return;
 
-    onSubmit(trimmedName);
+    state.playerName = name;
+    state.playerAvatar = avatar;
+
+    store.setPlayerInfo(name, avatar);
+
+    onClose();
   };
 
   const handleCancel = (): void => {
-    setName(initialValue);
-    onCancel();
+    setName(state.playerName);
+    setAvatar(state.playerAvatar || AVATARS[0]);
+    onClose();
   };
 
+  if (!isOpen) return null;
+
   return (
-    <Section title="Enter name" className="name-screen">
+    <Section title="Enter profile" className="name-screen">
       <div className="name-row">
         <input
           value={name}
           autoFocus
-          onChange={(event) => setName(event.target.value)}
+          onChange={(e) => setName(e.target.value)}
           placeholder="Type your name..."
           maxLength={24}
-          onKeyDown={(event) => {
-            if (event.key === 'Enter') {
-              handleSubmit();
-            }
-          }}
         />
+      </div>
 
-        <button type="button" onClick={handleSubmit} disabled={trimmedName.length === 0}>
+      <div className="avatar-grid">
+        {AVATARS.map((emoji) => {
+          const selected = avatar === emoji;
+
+          return (
+            <button
+              key={emoji}
+              type="button"
+              className={selected ? 'avatar selected' : 'avatar'}
+              onClick={() => setAvatar(emoji)}
+            >
+              <Avatar size='lg' value={emoji} />
+            </button>
+          );
+        })}
+      </div>
+
+      <div className="actions">
+        <button onClick={handleSubmit} disabled={!canSubmit}>
           Continue
         </button>
 
-        {hasInitialValue ? (
-          <button type="button" onClick={handleCancel}>
-            Cancel
-          </button>
-        ) : null}
+        {name.length > 0 && <button onClick={handleCancel}>Cancel</button>}
       </div>
     </Section>
   );

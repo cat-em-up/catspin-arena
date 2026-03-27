@@ -12,7 +12,7 @@ import { Header } from './components/layout/Header';
 
 import './styles/index.css';
 
-type Screen = 'name' | 'room_setup' | 'lobby' | 'game';
+type Screen = 'room_setup' | 'lobby' | 'game';
 
 function getPlayers(room: RoomDTO | null): readonly PlayerView[] {
   return room?.game.players ?? [];
@@ -26,11 +26,7 @@ function getCurrentPlayer(room: RoomDTO | null, playerId: string | null): Player
   return room.game.players.find((player) => player.id === playerId) ?? null;
 }
 
-function getScreen(playerName: string | null, room: RoomDTO | null, isEditingName: boolean): Screen {
-  if (playerName === null || playerName.trim().length === 0 || isEditingName) {
-    return 'name';
-  }
-
+function getScreen(playerName: string | null, room: RoomDTO | null): Screen {
   if (room === null) {
     return 'room_setup';
   }
@@ -47,7 +43,9 @@ export default function App() {
   const state = useClientStoreState();
 
   const [roomInput, setRoomInput] = useState<string>(() => getRoomIdFromHash() ?? '');
-  const [isEditingName, setIsEditingName] = useState<boolean>(false);
+  const [isNameScreenOpen, setIsNameScreenOpen] = useState<boolean>(() => {
+    return (state.playerName?.trim().length ?? 0) === 0;
+  });
 
   const autoJoinAttemptedRef = useRef(false);
 
@@ -58,14 +56,20 @@ export default function App() {
   }, [state.room, state.playerId]);
 
   const screen = useMemo(() => {
-    return getScreen(state.playerName, state.room, isEditingName);
-  }, [state.playerName, state.room, isEditingName]);
+    return getScreen(state.playerName, state.room);
+  }, [state.playerName, state.room]);
 
   const isHost = state.room !== null && state.playerId !== null && state.room.game.hostPlayerId === state.playerId;
 
   const trimmedPlayerName = state.playerName?.trim() ?? '';
   const canCreate = trimmedPlayerName.length > 0;
   const canJoin = trimmedPlayerName.length > 0 && roomInput.trim().length > 0;
+
+  useEffect(() => {
+    if (trimmedPlayerName.length === 0) {
+      setIsNameScreenOpen(true);
+    }
+  }, [trimmedPlayerName]);
 
   useEffect(() => {
     const handleHashChange = (): void => {
@@ -83,11 +87,12 @@ export default function App() {
 
   useEffect(() => {
     const roomIdFromHash = getRoomIdFromHash();
-    const name = state.playerName?.trim() ?? '';
+    const name = state.playerName;
+    const avatar = state.playerAvatar;
 
     if (!roomIdFromHash) return;
     if (name.length === 0) return;
-    if (isEditingName) return;
+    if (isNameScreenOpen) return;
     if (state.connectionStatus !== 'connected') return;
     if (state.room !== null) return;
     if (autoJoinAttemptedRef.current) return;
@@ -97,8 +102,9 @@ export default function App() {
     store.joinRoom({
       roomId: roomIdFromHash,
       name,
+      avatar,
     });
-  }, [state.connectionStatus, state.playerName, state.room, isEditingName, store]);
+  }, [state.connectionStatus, state.playerName, state.room, isNameScreenOpen, store]);
 
   useEffect(() => {
     if (state.room !== null) {
@@ -107,27 +113,23 @@ export default function App() {
     }
   }, [state.room]);
 
-  const handleSetPlayerName = (name: string): void => {
-    const trimmedName = name.trim();
-    if (trimmedName.length === 0) return;
-
-    store.setPlayerName(trimmedName);
-    setIsEditingName(false);
+  const handleOpenNameScreen = (): void => {
+    setIsNameScreenOpen(true);
     autoJoinAttemptedRef.current = false;
   };
 
-  const handleStartEditingName = (): void => {
-    setIsEditingName(true);
-    autoJoinAttemptedRef.current = false;
-  };
+  const handleCloseNameScreen = (): void => {
+    if (!state.playerName.length) {
+      return;
+    }
 
-  const handleCancelEditingName = (): void => {
-    if (trimmedPlayerName.length === 0) return;
-    setIsEditingName(false);
+    setIsNameScreenOpen(false);
   };
 
   const handleCreateRoom = async (): Promise<void> => {
-    const name = state.playerName?.trim() ?? '';
+    const name = state.playerName;
+    const avatar = state.playerAvatar;
+
     if (name.length === 0) return;
 
     try {
@@ -140,6 +142,7 @@ export default function App() {
       store.joinRoom({
         roomId,
         name,
+        avatar,
       });
     } catch (error) {
       console.error('Failed to create room', error);
@@ -148,7 +151,8 @@ export default function App() {
 
   const handleJoinRoom = (): void => {
     const roomId = roomInput.trim();
-    const name = state.playerName?.trim() ?? '';
+    const name = state.playerName;
+    const avatar = state.playerAvatar;
 
     if (roomId.length === 0 || name.length === 0) return;
 
@@ -158,6 +162,7 @@ export default function App() {
     store.joinRoom({
       roomId,
       name,
+      avatar,
     });
   };
 
@@ -174,11 +179,7 @@ export default function App() {
   return (
     <div className="app">
       <div className="shell">
-        <Header
-          connectionStatus={state.connectionStatus}
-          playerName={trimmedPlayerName}
-          onChangeName={handleStartEditingName}
-        />
+        <Header connectionStatus={state.connectionStatus} onChangeName={handleOpenNameScreen} />
 
         {state.error !== null ? (
           <div className="section">
@@ -187,15 +188,9 @@ export default function App() {
         ) : null}
 
         <main className="stack">
-          {screen === 'name' && (
-            <NameScreen
-              initialValue={state.playerName ?? ''}
-              onSubmit={handleSetPlayerName}
-              onCancel={handleCancelEditingName}
-            />
-          )}
+          <NameScreen isOpen={isNameScreenOpen} onClose={handleCloseNameScreen} />
 
-          {screen === 'room_setup' && (
+          {!isNameScreenOpen && screen === 'room_setup' && (
             <RoomSetupScreen
               roomInput={roomInput}
               onRoomInputChange={(value) => {
@@ -209,7 +204,7 @@ export default function App() {
             />
           )}
 
-          {screen === 'lobby' && state.room !== null && (
+          {!isNameScreenOpen && screen === 'lobby' && state.room !== null && (
             <LobbyScreen
               room={state.room}
               playerId={state.playerId}
@@ -222,7 +217,7 @@ export default function App() {
             />
           )}
 
-          {screen === 'game' && state.room !== null && (
+          {!isNameScreenOpen && screen === 'game' && state.room !== null && (
             <GameScreen
               room={state.room}
               playerId={state.playerId}

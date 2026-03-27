@@ -4,6 +4,7 @@ export type JoinRoomEvent = {
   sessionId: string;
   playerId: string;
   name: string;
+  avatar: string;
 };
 
 export type LeaveRoomEvent = {

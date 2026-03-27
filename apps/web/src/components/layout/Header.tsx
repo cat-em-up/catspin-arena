@@ -1,14 +1,14 @@
 import { SocketStatus } from '../../network/socket';
+import { useClientStoreState } from '../../state/storeContext';
+import { Avatar } from '../common/Avatar';
 
 type HeaderProps = {
   readonly connectionStatus: SocketStatus;
-  readonly playerName: string;
   readonly onChangeName: () => void;
 };
 
-export function Header({ connectionStatus, playerName, onChangeName }: HeaderProps) {
-  const hasPlayerName = playerName.trim().length > 0;
-  const displayName = hasPlayerName ? playerName : 'Guest';
+export function Header({ connectionStatus, onChangeName }: HeaderProps) {
+  const state = useClientStoreState();
 
   return (
     <header className="app-header">
@@ -16,7 +16,8 @@ export function Header({ connectionStatus, playerName, onChangeName }: HeaderPro
 
       <div className="user">
         <button type="button" onClick={onChangeName}>
-          {displayName}
+          <Avatar value={state.playerAvatar} />
+          {state.playerName || 'Guest'}
         </button>
 
         <span className="status" data-status={connectionStatus} />

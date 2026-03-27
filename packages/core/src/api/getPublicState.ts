@@ -17,6 +17,7 @@ export type PublicGameConfig = {
 export type PublicPlayerState = {
   readonly id: string;
   readonly name: string;
+  readonly avatar: string;
   readonly balance: number;
   readonly currentBet: number;
   readonly lastBet: number | null;
@@ -69,6 +70,7 @@ export function getPublicState(state: GameState): PublicGameState {
     players: state.players.map((player) => ({
       id: player.id,
       name: player.name,
+      avatar: player.avatar,
       balance: player.balance,
       currentBet: player.currentBet,
       lastBet: player.lastBet,

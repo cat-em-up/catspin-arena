@@ -7,6 +7,7 @@ export type GameCommand =
       readonly type: 'add_player';
       readonly playerId: PlayerId;
       readonly name: string;
+      readonly avatar: string;
     }
   | {
       readonly type: 'remove_player';
@@ -118,6 +119,7 @@ export function applyCommand(state: GameState, command: GameCommand): GameState 
       const nextPlayer = createPlayer({
         id: command.playerId,
         name: command.name,
+        avatar: command.avatar,
         startBalance: state.config.startBalance,
       });
 

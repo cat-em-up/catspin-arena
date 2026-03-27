@@ -13,7 +13,7 @@ export type RealtimeClientOptions = {
 export type RealtimeClient = {
   connect: () => void;
   disconnect: () => void;
-  joinRoom: (args: { roomId: string; name: string }) => void;
+  joinRoom: (args: { roomId: string; name: string; avatar: string }) => void;
   leaveRoom: () => void;
   setReady: (ready: boolean) => void;
   setBet: (amount: number) => void;
@@ -69,7 +69,7 @@ export function createRealtimeClient(options: RealtimeClientOptions): RealtimeCl
     connect: () => socket.connect(),
     disconnect: () => socket.disconnect(),
 
-    joinRoom: ({ roomId, name }) => {
+    joinRoom: ({ roomId, name, avatar }) => {
       const normalizedRoomId = roomId.trim();
       const normalizedName = name.trim();
 
@@ -81,6 +81,7 @@ export function createRealtimeClient(options: RealtimeClientOptions): RealtimeCl
         type: 'join_room',
         roomId: normalizedRoomId,
         name: normalizedName,
+        avatar,
         playerId,
         sessionId,
       });

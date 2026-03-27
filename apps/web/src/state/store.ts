@@ -2,7 +2,7 @@ import type { RoomDTO } from '@catspin/protocol';
 import { createRoom as createRoomRequest } from '../api/rooms';
 import { createRealtimeClient, type RealtimeClient } from '../network/client';
 import type { SocketStatus } from '../network/socket';
-import { getStoredPlayerName, savePlayerName } from '../utils/playerName';
+import { getStoredPlayerInfo, savePlayerInfo } from '../utils/playerInfo';
 
 export type FooterState = {
   primaryText: string;
@@ -14,6 +14,7 @@ export type ClientStoreState = {
   roomId: string | null;
   playerId: string | null;
   playerName: string;
+  playerAvatar: string;
   room: RoomDTO | null;
   error: string | null;
   footer: FooterState;
@@ -25,9 +26,9 @@ export type ClientStore = {
   subscribe: (listener: () => void) => () => void;
   connect: () => void;
   disconnect: () => void;
-  setPlayerName: (name: string) => void;
+  setPlayerInfo: (name: string, avatar: string) => void;
   createRoom: () => Promise<string>;
-  joinRoom: (args: { roomId: string; name: string }) => void;
+  joinRoom: (args: { roomId: string; name: string; avatar: string }) => void;
   leaveRoom: () => void;
   setReady: (ready: boolean) => void;
   setBet: (amount: number) => void;
@@ -47,11 +48,14 @@ const EMPTY_FOOTER: FooterState = {
 };
 
 export function createClientStore(options: CreateClientStoreOptions): ClientStore {
+  const { name: playerName, avatar: playerAvatar } = getStoredPlayerInfo();
+
   let state: ClientStoreState = {
     connectionStatus: 'idle',
     roomId: null,
     playerId: null,
-    playerName: getStoredPlayerName(),
+    playerName,
+    playerAvatar,
     room: null,
     error: null,
     footer: EMPTY_FOOTER,
@@ -118,10 +122,7 @@ export function createClientStore(options: CreateClientStoreOptions): ClientStor
 
     subscribe: (listener) => {
       listeners.add(listener);
-
-      return () => {
-        listeners.delete(listener);
-      };
+      return () => listeners.delete(listener);
     },
 
     connect: () => {
@@ -132,13 +133,12 @@ export function createClientStore(options: CreateClientStoreOptions): ClientStor
       client.disconnect();
     },
 
-    setPlayerName: (name: string) => {
-      const normalized = name.trim();
-
-      savePlayerName(normalized);
+    setPlayerInfo: (name: string, avatar: string) => {
+      savePlayerInfo(name, avatar);
 
       setState({
-        playerName: normalized,
+        playerName: name.trim(),
+        playerAvatar: avatar,
       });
     },
 
@@ -153,14 +153,15 @@ export function createClientStore(options: CreateClientStoreOptions): ClientStor
       return result.roomId;
     },
 
-    joinRoom: ({ roomId, name }) => {
+    joinRoom: ({ roomId, name, avatar }) => {
       setState({
         roomId,
         playerName: name,
+        playerAvatar: avatar,
         error: null,
       });
 
-      client.joinRoom({ roomId, name });
+      client.joinRoom({ roomId, name, avatar });
     },
 
     leaveRoom: () => {

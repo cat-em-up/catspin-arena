@@ -1,7 +1,7 @@
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import { StoreProvider } from './state/storeContext';
-import { startAnimatedPawFavicon } from './components/favicon/animatedFavicon';
+import { startAnimatedPawFavicon } from './components/common/animatedFavicon';
 
 startAnimatedPawFavicon();
 

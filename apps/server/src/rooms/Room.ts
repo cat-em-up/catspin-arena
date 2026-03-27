@@ -80,7 +80,7 @@ export class Room {
     return this.state.players.some((player) => player.id === playerId);
   }
 
-  public joinPlayer(args: { sessionId: string; playerId: string; name: string }): RoomSnapshot {
+  public joinPlayer(args: { sessionId: string; playerId: string; name: string; avatar: string }): RoomSnapshot {
     const existingSession = this.sessionsByPlayerId.get(args.playerId);
 
     if (existingSession !== undefined) {
@@ -94,6 +94,7 @@ export class Room {
       playerId: args.playerId,
       roomId: this.id,
       name: args.name,
+      avatar: args.avatar,
     });
 
     this.sessionsByPlayerId.set(args.playerId, session);
@@ -102,6 +103,7 @@ export class Room {
       type: 'add_player',
       playerId: args.playerId,
       name: args.name,
+      avatar: args.avatar,
     });
 
     return this.getSnapshot();
