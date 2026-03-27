@@ -13,7 +13,7 @@
       inset: 0;
       display: grid;
       place-items: center;
-      color: #fff4d6;
+      color: #ffffff;
       z-index: 9999;
       cursor: pointer;
       opacity: 1;
@@ -107,26 +107,30 @@
       transition: opacity 400ms ease, transform 400ms ease;
     }
 
-    .logo {
+    .catemup-logo,
+    .catspin-logo {
       margin: 0 auto 0 auto;
-      height: 260px;
       display: block;
     }
 
-    .title {
-      font-size: 38px;
-      font-weight: 800;
+    .catemup-logo {
+      height: clamp(200px, 40vw, 360px);
+    }
+
+    .catspin-logo {
+      height: clamp(300px, 40vw, 450px);
     }
 
     .subtitle {
       margin-top: 8px;
-      opacity: 0.8;
+      opacity: 0.9;
+      font-size: clamp(16px, 4.5vw, 26px);
     }
 
     .hint {
       margin-top: 20px;
-      font-size: 14px;
-      opacity: 0.5;
+      opacity: 0.7;
+      font-size: clamp(13px, 3.5vw, 18px);
     }
 
     #splash.is-closing {
@@ -239,6 +243,48 @@
         transform: translateY(0) scale(1);
       }
     }
+
+    @media (orientation: landscape) {
+      .splash-content {
+        inset: 0;
+      }
+
+      .catemup-logo {
+        position: absolute;
+        left: clamp(20px, 4vw, 80px);
+        top: 50%;
+        transform: translateY(-50%);
+        height: clamp(200px, 40vw, 360px);
+        margin: 0;
+      }
+
+      .catspin-logo {
+        position: absolute;
+        right: clamp(20px, 4vw, 80px);
+        top: 50%;
+        transform: translateY(-50%);
+        height: clamp(200px, 40vw, 360px);
+        margin: 0;
+      }
+
+      .subtitle,
+      .hint {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        text-align: center;
+      }
+
+      .subtitle {
+        font-size: clamp(14px, 1.6vw, 28px);
+        bottom: clamp(50px, 6vh, 120px);
+      }
+
+      .hint {
+        font-size: clamp(12px, 1.2vw, 20px);
+        bottom: clamp(20px, 3vh, 60px);
+      }
+    }
   </style>
 </head>
 
@@ -256,8 +302,8 @@
     </div>
 
     <div class="splash-content">
-      <img class="logo" src="assets/catemup_logo_square_transparent_softglow.png" alt="CatSpin Arena logo">
-      <div class="title">CatSpin Arena</div>
+      <img class="catemup-logo" src="assets/catemup_logo_square_transparent_softglow.png" alt="CatEmUp logo">
+      <img class="catspin-logo" src="assets/catspin_arena_logo.png" alt="CatSpin Arena logo">
       <div class="subtitle">Bet. Spin. Survive.</div>
       <div class="hint">Click to continue</div>
     </div>
@@ -268,36 +314,95 @@
   <script>
     (function () {
       const splash = document.getElementById('splash');
-      let splashSound = null;
 
-      splashSound = new Audio('./assets/welcome.mp3');
-      splashSound.preload = 'auto';
-      splashSound.volume = 1;
+      if (!splash) {
+        return;
+      }
+
+      const impactTimings = [0, 300, 600, 900, 1200, 1500, 1800];
+      const splashFadeDelayMs = 2600;
+      const splashFadeDurationMs = 500;
+
+      const IMPACT_VOLUME = 0.1;
+
+      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
 
       let isClosing = false;
+      let welcomeAudio = null;
+      let impactBuffer = null;
 
-      function removeSplash() {
-        if (!splash || isClosing) {
-          return;
+      async function loadAudioBuffer(url) {
+        const response = await fetch(url);
+        const arrayBuffer = await response.arrayBuffer();
+        return await audioContext.decodeAudioData(arrayBuffer);
+      }
+
+      async function initAudio() {
+        impactBuffer = await loadAudioBuffer('./assets/impact.mp3');
+
+        welcomeAudio = new Audio('./assets/welcome.mp3');
+        welcomeAudio.preload = 'auto';
+        welcomeAudio.volume = 1;
+        welcomeAudio.load();
+      }
+
+      function playWelcome() {
+        if (!welcomeAudio) return;
+
+        welcomeAudio.currentTime = 0;
+        welcomeAudio.volume = 1;
+        welcomeAudio.play().catch(() => { });
+      }
+
+      function playImpact() {
+        if (!impactBuffer) return;
+
+        const source = audioContext.createBufferSource();
+        source.buffer = impactBuffer;
+
+        const gainNode = audioContext.createGain();
+        gainNode.gain.value = IMPACT_VOLUME;
+
+        source.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+
+        source.start(0);
+      }
+
+      function playImpactSequence() {
+        impactTimings.forEach((delay) => {
+          window.setTimeout(() => {
+            playImpact();
+          }, delay);
+        });
+      }
+
+      async function unlockAudio() {
+        if (audioContext.state === 'suspended') {
+          await audioContext.resume();
         }
+      }
+
+      async function removeSplash() {
+        if (isClosing) return;
 
         isClosing = true;
-        splash.classList.add('is-closing');
 
-        if (splashSound) {
-          splashSound.currentTime = 0;
-          splashSound.play().catch(() => { });
-        }
+        await unlockAudio().catch(() => { });
+
+        splash.classList.add('is-closing');
+        playImpactSequence();
 
         window.setTimeout(() => {
-          splash.style.transition = 'opacity 500ms ease';
+          splash.style.transition = `opacity ${splashFadeDurationMs}ms ease`;
           splash.style.opacity = '0';
 
           window.setTimeout(() => {
             splash.remove();
             document.body.style.overflow = '';
-          }, 500);
-        }, 2600);
+            playWelcome();
+          }, splashFadeDurationMs);
+        }, splashFadeDelayMs);
       }
 
       if (window.location.hash && window.location.hash.length > 1) {
@@ -306,9 +411,16 @@
         return;
       }
 
-      if (splash) {
-        splash.addEventListener('click', removeSplash);
-      }
+      initAudio().catch(() => {
+        welcomeAudio = new Audio('./assets/welcome.mp3');
+        welcomeAudio.preload = 'auto';
+        welcomeAudio.volume = 1;
+        welcomeAudio.load();
+      });
+
+      splash.addEventListener('click', () => {
+        removeSplash().catch(() => { });
+      });
     })();
   </script>
 
