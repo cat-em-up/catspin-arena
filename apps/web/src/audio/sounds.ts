@@ -11,7 +11,7 @@ export const sounds = {
   },
   bet: {
     src: 'assets/sfx/bet.wav',
-    volume: 1,
+    volume: 0.2,
   },
   spin: {
     src: 'assets/sfx/spin.wav',

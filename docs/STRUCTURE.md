@@ -25,8 +25,12 @@
 │     ├─ src
 │     │  ├─ api
 │     │  │  └─ rooms.ts
+│     │  ├─ audio
+│     │  │  ├─ audio.ts
+│     │  │  ├─ index.ts
+│     │  │  └─ sounds.ts
 │     │  ├─ components
-│     │  │  ├─ favicon
+│     │  │  ├─ common
 │     │  │  │  └─ animatedFavicon.ts
 │     │  │  └─ screens
 │     │  │     └─ game
@@ -39,7 +43,7 @@
 │     │  ├─ types
 │     │  │  └─ playerView.ts
 │     │  └─ utils
-│     │     ├─ playerName.ts
+│     │     ├─ playerInfo.ts
 │     │     └─ roomHash.ts
 │     └─ vite.config.ts
 └─ packages
@@ -75,8 +79,6 @@
    │     ├─ events
    │     │  ├─ client.ts
    │     │  └─ server.ts
-   │     ├─ schemas
-   │     │  └─ index.ts
    │     ├─ types
    │     │  ├─ GameStateDTO.ts
    │     │  ├─ PlayerDTO.ts
@@ -147,10 +149,12 @@ Exported Functions:
 Internal Functions:
 - cleanupConnection(context)
 - handleBet(context, event)
+- handleConfirmBet(context, event)
 - handleJoin(context, event)
 - handleLeave(context)
 - handleReady(context, event)
 - handleStart(context, event)
+- isClientEvent(value)
 - send(socket, event)
 - subscribeToRoom(context, room)
 
@@ -170,7 +174,45 @@ Exported Functions:
 Types:
 - CreateRoomResponse
 
-### apps/web/src/components/favicon/animatedFavicon.ts
+### apps/web/src/audio/audio.ts
+
+Exported Functions:
+- initAudio()
+- isMusicEnabled()
+- isSfxEnabled()
+- playLoop(id)
+- playMusic(source)
+- playSound(id)
+- setMasterVolume(value)
+- setMusicEnabled(value)
+- setMusicVolume(value)
+- setMuted(value)
+- setSfxEnabled(value)
+- stopLoop(id)
+- stopMusic()
+- unlockAudio()
+
+Internal Functions:
+- applyBaseVolume(audio, id)
+- applyMusicVolume(audio, id)
+- clamp(value)
+- clearActiveMusicHandlers(audio)
+- isSoundKey(value)
+- playPlaylistTrack(token)
+- shuffleStrings(values)
+
+Types:
+- SoundKey
+
+### apps/web/src/audio/index.ts
+
+### apps/web/src/audio/sounds.ts
+
+Types:
+- SoundDefinition
+- SoundId
+
+### apps/web/src/components/common/animatedFavicon.ts
 
 Exported Functions:
 - startAnimatedPawFavicon()
@@ -224,11 +266,11 @@ Types:
 Types:
 - PlayerView
 
-### apps/web/src/utils/playerName.ts
+### apps/web/src/utils/playerInfo.ts
 
 Exported Functions:
-- getStoredPlayerName()
-- savePlayerName(value)
+- getStoredPlayerInfo()
+- savePlayerInfo(name, avatar)
 
 ### apps/web/src/utils/roomHash.ts
 
@@ -250,6 +292,7 @@ Exported Functions:
 Internal Functions:
 - canStartGame(state)
 - createBettingRound(state, now)
+- createPresentingRound(state, now)
 - replacePlayer(players, playerId, update)
 - sanitizeBet(state, amount, balance)
 
@@ -281,13 +324,19 @@ Exported Functions:
 
 Internal Functions:
 - buildSpinResult(state)
-- createBettingRound(state, now)
+- createBettingPhaseForCurrentRound(state, now)
+- createBettingRound(state, now, index)
+- createNextBettingRound(state, now)
 - getAlivePlayers(players)
+- getPaylineSequenceDuration(linesCount, config)
+- getPresentingDurationMs(state)
+- getResolvedDurationMs(state)
 - getWinnerPlayerId(state, players)
-- haveAllActivePlayersPlacedBets(state)
+- haveAllActivePlayersConfirmedBets(state)
 - normalizeBetsForSpin(state)
 - preparePlayersForNextRound(state)
 - resolveAutoBet(state, player)
+- resolvePreferredBet(state, player)
 - resolveRoundOutcome(state, result)
 - sanitizeRoundBet(minBet, maxBet, player)
 - shouldFinishGame(state, players)
@@ -379,6 +428,7 @@ Types:
 - GameStatus
 - MissedBetPolicy
 - Payline
+- PaylinePresentationConfig
 - PayoutBasePolicy
 - Paytable
 - RoundRules
@@ -393,6 +443,7 @@ Types:
 
 Types:
 - ClientEvent
+- ConfirmBetEvent
 - JoinRoomEvent
 - LeaveRoomEvent
 - SetBetEvent
@@ -410,18 +461,6 @@ Types:
 
 ### packages/protocol/src/index.ts
 
-### packages/protocol/src/schemas/index.ts
-
-Types:
-- GameConfigSchema
-- GameStateSchema
-- PlayerSchema
-- RoomSchema
-- RoundSchema
-- SpinResultSchema
-- SymbolIdSchema
-- WinningLineSchema
-
 ### packages/protocol/src/types/GameStateDTO.ts
 
 Types:
@@ -429,6 +468,7 @@ Types:
 - GameStateDTO
 - GameStatusDTO
 - PaylineDTO
+- PaylinePresentationConfigDTO
 - RoundDTO
 - RoundStatusDTO
 - SpinResultDTO
