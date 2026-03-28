@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { getAvatar } from '@catspin/assets';
 
 type AvatarProps = {
   readonly value: string;
@@ -6,22 +7,18 @@ type AvatarProps = {
   readonly mood?: 'neutral' | 'win' | 'lose';
 };
 
-const PATH = '/assets/avatars';
-
 const SUFFIX = {
   neutral: 'n',
   win: 'w',
   lose: 'l',
-};
+} as const;
 
 export function Avatar({ value, size = 'sm', mood = 'neutral' }: AvatarProps) {
   const [currentMood, setCurrentMood] = useState(mood);
 
   useEffect(() => {
-    // Reset immediately
     setCurrentMood(mood);
 
-    // Animate only for "win"
     if (mood !== 'win') {
       return;
     }
@@ -37,18 +34,11 @@ export function Avatar({ value, size = 'sm', mood = 'neutral' }: AvatarProps) {
   }, [mood]);
 
   const suffix = SUFFIX[currentMood];
-  const src = `${PATH}/${value}-${suffix}.png`;
+  const src = getAvatar(value, suffix);
 
   return (
     <div className={`avatar ${size}`}>
-      <img
-        src={src}
-        alt={value}
-        draggable={false}
-        onError={(event) => {
-          event.currentTarget.src = `${PATH}/default-${suffix}.png`;
-        }}
-      />
+      <img src={src} alt={value} draggable={false} />
     </div>
   );
 }

@@ -1,50 +1,59 @@
+import click from '@catspin/assets/sfx/click.wav';
+import bet from '@catspin/assets/sfx/bet.wav';
+import spin from '@catspin/assets/sfx/spin.wav';
+import payline from '@catspin/assets/sfx/payline.wav';
+import win from '@catspin/assets/sfx/win.wav';
+import meow from '@catspin/assets/sfx/meow.wav';
+
+import mainTheme from '@catspin/assets/music/Meowami-CatCity.mp3';
+import mainThemeMix1 from '@catspin/assets/music/Meowami-CatCity-remix1.mp3';
+import mainThemeMix2 from '@catspin/assets/music/Meowami-CatCity-remix2.mp3';
+import mainThemeMix3 from '@catspin/assets/music/Meowami-CatCity-remix3.mp3';
+
 export type SoundDefinition = {
   readonly src: string;
   readonly volume: number;
 };
 
 export const sounds = {
-  // SFX
   click: {
-    src: 'assets/sfx/click.wav',
+    src: click,
     volume: 1,
   },
   bet: {
-    src: 'assets/sfx/bet.wav',
+    src: bet,
     volume: 0.2,
   },
   spin: {
-    src: 'assets/sfx/spin.wav',
+    src: spin,
     volume: 0.7,
   },
   payline: {
-    src: 'assets/sfx/payline.wav',
+    src: payline,
     volume: 0.2,
   },
   win: {
-    src: 'assets/sfx/win.wav',
+    src: win,
     volume: 1,
   },
   meow: {
-    src: 'assets/sfx/meow.wav',
+    src: meow,
     volume: 1,
   },
-
-  // Music
   main_theme: {
-    src: 'assets/music/Meowami-CatCity.mp3',
+    src: mainTheme,
     volume: 0.5,
   },
   main_theme_mix1: {
-    src: 'assets/music/Meowami-CatCity-remix1.mp3',
+    src: mainThemeMix1,
     volume: 0.5,
   },
   main_theme_mix2: {
-    src: 'assets/music/Meowami-CatCity-remix2.mp3',
+    src: mainThemeMix2,
     volume: 0.5,
   },
   main_theme_mix3: {
-    src: 'assets/music/Meowami-CatCity-remix3.mp3',
+    src: mainThemeMix3,
     volume: 0.5,
   },
 } as const satisfies Record<string, SoundDefinition>;

@@ -10,6 +10,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
+    "@catspin/assets": "workspace:*",
     "@catspin/protocol": "workspace:*",
     "@catspin/shared": "workspace:*",
     "react": "^19.0.0",

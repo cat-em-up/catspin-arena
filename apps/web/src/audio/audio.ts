@@ -1,4 +1,4 @@
-import { sounds } from './sounds';
+import { sounds } from '@catspin/assets';
 
 type SoundKey = keyof typeof sounds;
 

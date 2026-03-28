@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { SLOT_SYMBOL_IDS, SLOT_SYMBOL_VIEW } from '@catspin/assets';
 import type { SymbolIdDTO, WinningLineDTO, RoundStatusDTO, PaylinePresentationConfigDTO } from '@catspin/protocol';
 import { playSound } from '../../../audio';
-import { SLOT_SYMBOL_IDS, SLOT_SYMBOL_VIEW } from './slotSymbols';
 import { SlotPaylinesOverlay } from './SlotPaylinesOverlay';
 
 type SlotMachineProps = {
