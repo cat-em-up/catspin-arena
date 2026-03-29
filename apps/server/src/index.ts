@@ -1,5 +1,8 @@
 import Fastify from 'fastify';
 import cors from '@fastify/cors';
+import fastifyStatic from '@fastify/static';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 import { GameLoop } from './game/GameLoop';
 import { RoomManager } from './rooms/RoomManager';
@@ -15,6 +18,15 @@ async function bootstrap(): Promise<void> {
     origin: 'http://localhost:5173',
     methods: ['GET', 'POST', 'OPTIONS'],
     allowedHeaders: ['Content-Type'],
+  });
+
+  const __filename = fileURLToPath(import.meta.url);
+  const __dirname = path.dirname(__filename);
+  const webDistPath = path.resolve(__dirname, '../../web/dist');
+
+  await app.register(fastifyStatic, {
+    root: webDistPath,
+    prefix: '/',
   });
 
   const roomManager = new RoomManager();
