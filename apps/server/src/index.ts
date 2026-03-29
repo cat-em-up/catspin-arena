@@ -57,13 +57,15 @@ async function bootstrap(): Promise<void> {
     void shutdown('SIGTERM');
   });
 
+  const port = Number(process.env.PORT ?? 3000);
+
   await app.listen({
-    port: 3000,
+    port,
     host: '0.0.0.0',
   });
 
-  app.log.info('HTTP server started on http://localhost:3000');
-  app.log.info('WebSocket server attached on ws://localhost:3000/ws');
+  app.log.info(`HTTP server started on port ${port}`);
+  app.log.info('WebSocket server attached on /ws');
   app.log.info('Game loop started');
 }
 
