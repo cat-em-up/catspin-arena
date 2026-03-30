@@ -10,7 +10,20 @@ type NameScreenProps = {
   readonly onClose: () => void;
 };
 
-const AVATARS = ['cat-1', 'cat-2', 'cat-3'];
+const AVATARS = [
+  'cat-1',
+  'cat-2',
+  'cat-3',
+  'dog-1',
+  'dog-2',
+  'dog-3',
+  'boar-1',
+  'boar-2',
+  'boar-3',
+  'mouse-1',
+  'mouse-2',
+  'mouse-3',
+];
 
 export function NameScreen(props: NameScreenProps) {
   const { isOpen, onClose } = props;
